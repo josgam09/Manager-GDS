@@ -6,8 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import RequirementStatusBadge from '@/components/RequirementStatusBadge';
 import RequirementPriorityBadge from '@/components/RequirementPriorityBadge';
-import GDSSystemBadge from '@/components/GDSSystemBadge';
-import { ArrowLeft, Mail, Phone, User, Calendar, Clock, Server, Building2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, User, Calendar, Clock, Server, Building2, Home } from 'lucide-react';
 
 const RequirementDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,47 +18,41 @@ const RequirementDetail = () => {
   if (!requirement) {
     return (
       <div className="space-y-6">
-        <Button onClick={() => navigate('/requirements')} variant="outline" className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Volver
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => navigate('/')} variant="outline" className="gap-2">
+            <Home className="h-4 w-4" />
+            Inicio
+          </Button>
+          <Button onClick={() => navigate('/requirements')} variant="outline" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Volver a Requerimientos
+          </Button>
+        </div>
         <Card>
           <CardContent className="py-12">
-            <p className="text-center text-muted-foreground">Requerimiento no encontrado</p>
+            <div className="text-center space-y-4">
+              <p className="text-muted-foreground">Requerimiento no encontrado</p>
+              <Button onClick={() => navigate('/')}>Volver al Inicio</Button>
+            </div>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  const requirementTypeLabels = {
-    consulta: 'Consulta',
-    incidencia: 'Incidencia',
-    solicitud: 'Solicitud',
-    configuracion: 'Configuración',
-    reportes: 'Reportes',
-    otro: 'Otro',
-  };
-
-  const categoryLabels = {
-    reservas: 'Reservas',
-    tarifas: 'Tarifas',
-    disponibilidad: 'Disponibilidad',
-    pnr: 'PNR',
-    tickets: 'Tickets',
-    reportes: 'Reportes',
-    accesos: 'Accesos',
-    capacitacion: 'Capacitación',
-    otro: 'Otro',
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button onClick={() => navigate('/requirements')} variant="outline" className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Volver a Requerimientos
-        </Button>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex gap-2">
+          <Button onClick={() => navigate('/')} variant="outline" className="gap-2">
+            <Home className="h-4 w-4" />
+            Inicio
+          </Button>
+          <Button onClick={() => navigate('/requirements')} variant="outline" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Volver a Requerimientos
+          </Button>
+        </div>
         <Link to={`/requirements/${requirement.id}/edit`}>
           <Button>Editar Requerimiento</Button>
         </Link>
@@ -71,16 +64,23 @@ const RequirementDetail = () => {
             <CardHeader>
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-2 flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="outline" className="font-mono">
                       {requirement.ticketNumber}
                     </Badge>
+                    <Badge variant="outline">
+                      {requirement.origenConsulta}
+                    </Badge>
+                    {requirement.esSoporteIngles && (
+                      <Badge variant="secondary">Soporte Inglés</Badge>
+                    )}
                   </div>
-                  <CardTitle className="text-2xl">{requirement.title}</CardTitle>
+                  <CardTitle className="text-2xl">
+                    {requirement.tipoSolicitud || requirement.reclamoIncidente || 'Requerimiento GDS'}
+                  </CardTitle>
                   <div className="flex flex-wrap items-center gap-2">
                     <RequirementStatusBadge status={requirement.status} />
                     <RequirementPriorityBadge priority={requirement.priority} />
-                    <GDSSystemBadge system={requirement.gdsSystem} />
                   </div>
                 </div>
               </div>
@@ -88,69 +88,57 @@ const RequirementDetail = () => {
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <h3 className="font-semibold mb-2">Tipo de Requerimiento</h3>
-                  <p className="text-muted-foreground">{requirementTypeLabels[requirement.requirementType]}</p>
+                  <h3 className="font-semibold mb-2">PNR - TKT - Localizador</h3>
+                  <p className="text-muted-foreground font-mono">{requirement.pnrTktLocalizador}</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-2">Categoría</h3>
-                  <p className="text-muted-foreground">{categoryLabels[requirement.category]}</p>
+                  <h3 className="font-semibold mb-2">Canal de Consulta</h3>
+                  <p className="text-muted-foreground">{requirement.canalConsulta}</p>
                 </div>
               </div>
-              <Separator />
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <h3 className="font-semibold mb-2">Sistema GDS</h3>
-                  <p className="text-muted-foreground">{requirement.gdsSystem.toUpperCase()}</p>
-                </div>
-                {requirement.affectedPNR && (
-                  <div>
-                    <h3 className="font-semibold mb-2">PNR Afectado</h3>
-                    <p className="text-muted-foreground font-mono">{requirement.affectedPNR}</p>
-                  </div>
-                )}
-              </div>
-              {(requirement.officeId || requirement.pcc) && (
+
+              {requirement.tipoSolicitud && (
                 <>
                   <Separator />
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {requirement.officeId && (
-                      <div>
-                        <h3 className="font-semibold mb-2">Office ID</h3>
-                        <p className="text-muted-foreground font-mono">{requirement.officeId}</p>
-                      </div>
-                    )}
-                    {requirement.pcc && (
-                      <div>
-                        <h3 className="font-semibold mb-2">PCC</h3>
-                        <p className="text-muted-foreground font-mono">{requirement.pcc}</p>
-                      </div>
-                    )}
+                  <div>
+                    <h3 className="font-semibold mb-2">Tipo de Solicitud</h3>
+                    <p className="text-muted-foreground">{requirement.tipoSolicitud}</p>
                   </div>
                 </>
               )}
-              <Separator />
-              <div>
-                <h3 className="font-semibold mb-2">Descripción del Requerimiento</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">{requirement.description}</p>
-              </div>
-              <Separator />
-              <div>
-                <h3 className="font-semibold mb-2">Resultado Esperado</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">{requirement.expectedResult}</p>
-              </div>
-              {requirement.errorMessage && (
+
+              {requirement.reclamoIncidente && (
                 <>
                   <Separator />
                   <div>
-                    <h3 className="font-semibold mb-2 flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-destructive" />
-                      Mensaje de Error
-                    </h3>
-                    <div className="bg-destructive/10 p-4 rounded-md">
-                      <pre className="text-sm text-destructive font-mono whitespace-pre-wrap">
-                        {requirement.errorMessage}
-                      </pre>
-                    </div>
+                    <h3 className="font-semibold mb-2">Reclamo / Incidente</h3>
+                    <p className="text-muted-foreground">{requirement.reclamoIncidente}</p>
+                  </div>
+                </>
+              )}
+
+              <Separator />
+              <div>
+                <h3 className="font-semibold mb-2">Solicitud del Cliente</h3>
+                <p className="text-muted-foreground whitespace-pre-wrap">{requirement.solicitudCliente}</p>
+              </div>
+
+              {requirement.informacionBrindada && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="font-semibold mb-2">Información Brindada</h3>
+                    <p className="text-muted-foreground whitespace-pre-wrap">{requirement.informacionBrindada}</p>
+                  </div>
+                </>
+              )}
+
+              {requirement.observaciones && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="font-semibold mb-2">Observaciones</h3>
+                    <p className="text-muted-foreground whitespace-pre-wrap">{requirement.observaciones}</p>
                   </div>
                 </>
               )}
@@ -201,35 +189,17 @@ const RequirementDetail = () => {
               <div className="flex items-center gap-3">
                 <User className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Nombre</p>
-                  <p className="font-medium">{requirement.requesterName}</p>
+                  <p className="text-sm text-muted-foreground">Asesor</p>
+                  <p className="font-medium">{requirement.nombreAsesor}</p>
                 </div>
               </div>
-              {requirement.organization && (
-                <div className="flex items-center gap-3">
-                  <Building2 className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Organización</p>
-                    <p className="font-medium">{requirement.organization}</p>
-                  </div>
-                </div>
-              )}
               <div className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="font-medium break-all">{requirement.requesterEmail}</p>
+                  <p className="font-medium break-all">{requirement.correoElectronico}</p>
                 </div>
               </div>
-              {requirement.requesterPhone && (
-                <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Teléfono</p>
-                    <p className="font-medium">{requirement.requesterPhone}</p>
-                  </div>
-                </div>
-              )}
             </CardContent>
           </Card>
 
@@ -238,6 +208,13 @@ const RequirementDetail = () => {
               <CardTitle>Detalles del Requerimiento</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Clock className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Hora de Ingreso</p>
+                  <p className="font-medium">{requirement.horaIngresoCorreo}</p>
+                </div>
+              </div>
               <div className="flex items-center gap-3">
                 <Calendar className="h-5 w-5 text-muted-foreground" />
                 <div>
@@ -250,7 +227,7 @@ const RequirementDetail = () => {
               <div className="flex items-center gap-3">
                 <Calendar className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Fecha de Creación en Sistema</p>
+                  <p className="text-sm text-muted-foreground">Fecha de Creación</p>
                   <p className="font-medium">
                     {new Date(requirement.createdAt).toLocaleString('es-AR')}
                   </p>
@@ -267,7 +244,7 @@ const RequirementDetail = () => {
               </div>
               {requirement.slaDeadline && (
                 <div className="flex items-center gap-3">
-                  <AlertTriangle className="h-5 w-5 text-warning" />
+                  <Calendar className="h-5 w-5 text-warning" />
                   <div>
                     <p className="text-sm text-muted-foreground">Fecha Límite SLA</p>
                     <p className="font-medium text-warning">
@@ -314,4 +291,3 @@ const RequirementDetail = () => {
 };
 
 export default RequirementDetail;
-

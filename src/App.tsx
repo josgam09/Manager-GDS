@@ -8,7 +8,7 @@ import Layout from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import RequirementsList from "@/pages/RequirementsList";
 import RequirementDetail from "@/pages/RequirementDetail";
-import RequirementForm from "@/pages/RequirementForm";
+import RequirementForm from "@/pages/RequirementFormSimple";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
