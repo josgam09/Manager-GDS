@@ -1,8 +1,55 @@
 export type RequirementStatus = 'nuevo' | 'en-proceso' | 'pendiente-informacion' | 'resuelto' | 'cerrado';
 export type RequirementPriority = 'baja' | 'media' | 'alta' | 'critica';
-export type RequirementType = 'consulta' | 'incidencia' | 'solicitud' | 'configuracion' | 'reportes' | 'otro';
-export type GDSSystem = 'sabre' | 'amadeus' | 'travelport' | 'sirena' | 'otro';
-export type RequirementCategory = 'reservas' | 'tarifas' | 'disponibilidad' | 'pnr' | 'tickets' | 'reportes' | 'accesos' | 'capacitacion' | 'otro';
+
+// Nombre del Asesor
+export type AsesorName = 
+  | 'Jenny Andrea Taborda'
+  | 'Jhoan Restrepo'
+  | 'José Ramos'
+  | 'Julieth Urbina'
+  | 'Luz Lozada'
+  | 'Manuela Maz'
+  | 'Mauricio Rios'
+  | 'Nazly Lugo'
+  | 'Rafael Carmona'
+  | 'Sandra Milena Jaramillo'
+  | 'Sofia Guarin'
+  | 'Valentina Mejía'
+  | 'Viviana Virlen';
+
+// Canal de Consulta (fijo)
+export type CanalConsulta = 'SISTEMA DE DISTRIBUCIÓN GDS';
+
+// Origen Consulta
+export type OrigenConsulta = 'GDS' | 'AMADEUS' | 'NO CORRESPONDE';
+
+// Tipo de Solicitud
+export type TipoSolicitud = 
+  | 'Waiver GDS - Sabre'
+  | 'Waiver Comercial'
+  | 'Remisión Voluntaria - Involuntaria'
+  | 'Cesión - Cambio de Nombre Vol - Corrección'
+  | 'Certificado Médico'
+  | 'Cambio de Status (Ticket)'
+  | 'Opcionales - BUNDLES'
+  | 'Retracto (CL/BR/CO)'
+  | 'Política Comercial - Regulación de Emisión'
+  | 'Facturación'
+  | 'Toma de Pagos (WebPay/Portal AG/Otro)';
+
+// Reclamos / Incidentes
+export type ReclamoIncidente = 
+  | 'Error en Emisión (Amadeus - Navitaire -Sabre)'
+  | 'Alternativa por Cancelación - Demora - Sobreventa'
+  | 'Proceso o Estado de Devolución (PW/APP/BSP/ARC)'
+  | 'Segmentos Pasivos - Error BUNDLE'
+  | 'Cobro Erróneo ATO - No corresponde'
+  | 'Check-in'
+  | 'Escalamiento Finanzas - Facturación -ATO'
+  | 'Ingreso APP - Error en ATO -Otro'
+  | 'ACM (Dev BSP/ARC/Pago Exceso)'
+  | 'Otro'
+  | 'PNR HX';
 
 export interface RequirementHistory {
   id: string;
@@ -14,31 +61,37 @@ export interface RequirementHistory {
 
 export interface Requirement {
   id: string;
-  ticketNumber: string; // Número de ticket/caso
-  title: string; // Asunto del requerimiento
-  requirementType: RequirementType;
-  gdsSystem: GDSSystem; // Sistema GDS afectado
-  category: RequirementCategory;
-  requesterName: string;
-  requesterEmail: string;
-  requesterPhone: string;
-  organization: string; // Agencia/Organización
-  officeId?: string; // Office ID del GDS
-  pcc?: string; // Pseudo City Code
-  description: string; // Descripción detallada del requerimiento
-  expectedResult: string; // Resultado esperado o solución requerida
-  affectedPNR?: string; // PNR afectado (si aplica)
-  errorMessage?: string; // Mensaje de error (si aplica)
-  initialDate: Date;
+  ticketNumber: string; // Número de ticket/caso autogenerado
+  
+  // Campos del formulario
+  nombreAsesor: AsesorName;
+  canalConsulta: CanalConsulta;
+  origenConsulta: OrigenConsulta;
+  esSoporteIngles: boolean; // Si/No
+  horaIngresoCorreo: string; // Formato HH:MM
+  pnrTktLocalizador: string; // PNR - TKT - Localizador AMADEUS-SABRE
+  correoElectronico: string;
+  tipoSolicitud: TipoSolicitud | '';
+  reclamoIncidente: ReclamoIncidente | '';
+  solicitudCliente: string; // Texto largo
+  informacionBrindada: string; // Texto largo
+  observaciones: string; // Texto largo
+  
+  // Campos de gestión interna
   status: RequirementStatus;
   priority: RequirementPriority;
   assignedTo?: string;
-  assignedTeam?: string; // Equipo asignado (Soporte GDS, Desarrollo, Comercial, etc.)
-  slaDeadline?: Date; // Fecha límite según SLA
+  assignedTeam?: string;
+  slaDeadline?: Date;
+  
+  // Timestamps
+  initialDate: Date;
   createdAt: Date;
   updatedAt: Date;
   resolvedAt?: Date;
+  
+  // Historial y extras
   history: RequirementHistory[];
-  attachments?: string[]; // URLs o nombres de archivos adjuntos
-  tags?: string[]; // Etiquetas para categorización adicional
+  attachments?: string[];
+  tags?: string[];
 }

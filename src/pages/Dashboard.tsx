@@ -2,10 +2,10 @@ import { useRequirements } from '@/contexts/RequirementContext';
 import StatCard from '@/components/StatCard';
 import RequirementStatusBadge from '@/components/RequirementStatusBadge';
 import RequirementPriorityBadge from '@/components/RequirementPriorityBadge';
-import GDSSystemBadge from '@/components/GDSSystemBadge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle, Clock, TrendingUp, Plus, Server } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { AlertCircle, CheckCircle, Clock, TrendingUp, Plus, Server, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
@@ -19,13 +19,15 @@ const Dashboard = () => {
     critica: requirements.filter(r => r.priority === 'critica').length,
   };
 
-  // Estadísticas por sistema GDS
-  const gdsSystems = {
-    sabre: requirements.filter(r => r.gdsSystem === 'sabre').length,
-    amadeus: requirements.filter(r => r.gdsSystem === 'amadeus').length,
-    travelport: requirements.filter(r => r.gdsSystem === 'travelport').length,
-    sirena: requirements.filter(r => r.gdsSystem === 'sirena').length,
+  // Estadísticas por origen de consulta
+  const origenStats = {
+    gds: requirements.filter(r => r.origenConsulta === 'GDS').length,
+    amadeus: requirements.filter(r => r.origenConsulta === 'AMADEUS').length,
+    noCorresponde: requirements.filter(r => r.origenConsulta === 'NO CORRESPONDE').length,
   };
+
+  // Estadísticas por soporte inglés
+  const soporteIngles = requirements.filter(r => r.esSoporteIngles).length;
 
   const recentRequirements = requirements.slice(0, 5);
 
@@ -129,38 +131,38 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Server className="h-5 w-5" />
-              Sistemas GDS
+              Origen de Consulta
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <span className="text-sm">Sabre</span>
-                </div>
-                <span className="font-semibold">{gdsSystems.sabre}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                  <span className="text-sm">Amadeus</span>
+                  <span className="text-sm">GDS</span>
                 </div>
-                <span className="font-semibold">{gdsSystems.amadeus}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  <span className="text-sm">Travelport</span>
-                </div>
-                <span className="font-semibold">{gdsSystems.travelport}</span>
+                <span className="font-semibold">{origenStats.gds}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                  <span className="text-sm">Sirena</span>
+                  <span className="text-sm">AMADEUS</span>
                 </div>
-                <span className="font-semibold">{gdsSystems.sirena}</span>
+                <span className="font-semibold">{origenStats.amadeus}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-gray-500"></div>
+                  <span className="text-sm">No Corresponde</span>
+                </div>
+                <span className="font-semibold">{origenStats.noCorresponde}</span>
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Soporte Inglés</span>
+                </div>
+                <span className="font-semibold">{soporteIngles}</span>
               </div>
             </div>
           </CardContent>
@@ -185,20 +187,28 @@ const Dashboard = () => {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-mono text-muted-foreground">
+                      <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded">
                         {requirement.ticketNumber}
                       </span>
-                      <h3 className="font-semibold truncate">{requirement.title}</h3>
+                      <Badge variant="outline" className="text-xs">
+                        {requirement.origenConsulta}
+                      </Badge>
+                      {requirement.esSoporteIngles && (
+                        <Badge variant="secondary" className="text-xs">EN</Badge>
+                      )}
                     </div>
+                    <h3 className="font-semibold mb-1">{requirement.tipoSolicitud || requirement.reclamoIncidente || 'Sin clasificar'}</h3>
                     <p className="text-sm text-muted-foreground truncate mb-2">
-                      {requirement.description}
+                      {requirement.solicitudCliente}
                     </p>
                     <div className="flex flex-wrap items-center gap-2">
                       <RequirementStatusBadge status={requirement.status} />
                       <RequirementPriorityBadge priority={requirement.priority} />
-                      <GDSSystemBadge system={requirement.gdsSystem} />
                       <span className="text-xs text-muted-foreground">
-                        {requirement.organization}
+                        PNR: {requirement.pnrTktLocalizador}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Asesor: {requirement.nombreAsesor}
                       </span>
                     </div>
                   </div>

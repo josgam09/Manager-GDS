@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Requirement, RequirementStatus, RequirementPriority, RequirementType, GDSSystem, RequirementCategory } from '@/types/requirement';
+import { Requirement, RequirementStatus, RequirementPriority } from '@/types/requirement';
 
 interface RequirementContextType {
   requirements: Requirement[];
-  addRequirement: (requirement: Omit<Requirement, 'id' | 'createdAt' | 'updatedAt' | 'history'>) => void;
+  addRequirement: (requirement: Omit<Requirement, 'id' | 'createdAt' | 'updatedAt' | 'history' | 'ticketNumber'>) => void;
   updateRequirement: (id: string, updates: Partial<Requirement>) => void;
   deleteRequirement: (id: string) => void;
   getRequirement: (id: string) => Requirement | undefined;
@@ -17,26 +17,24 @@ const mockRequirements: Requirement[] = [
   {
     id: '1',
     ticketNumber: 'GDS-2025-001',
-    title: 'Error al procesar reserva en Sabre',
-    requirementType: 'incidencia',
-    gdsSystem: 'sabre',
-    category: 'reservas',
-    requesterName: 'María González',
-    requesterEmail: 'maria.gonzalez@agencia.com',
-    requesterPhone: '+54 11 1234-5678',
-    organization: 'Viajes Globales SA',
-    officeId: 'BUEXX08AA',
-    pcc: '4TL8',
-    description: 'Al intentar crear una reserva con múltiples segmentos, el sistema GDS Sabre retorna error de timeout. El problema ocurre consistentemente con vuelos que tienen más de 3 segmentos.',
-    expectedResult: 'Poder crear reservas con múltiples segmentos sin errores de timeout',
-    affectedPNR: 'ABC123',
-    errorMessage: 'ERR: TIMEOUT - UNABLE TO PROCESS REQUEST',
-    initialDate: new Date('2025-01-15'),
+    nombreAsesor: 'Sandra Milena Jaramillo',
+    canalConsulta: 'SISTEMA DE DISTRIBUCIÓN GDS',
+    origenConsulta: 'AMADEUS',
+    esSoporteIngles: false,
+    horaIngresoCorreo: '09:30',
+    pnrTktLocalizador: 'ABC123',
+    correoElectronico: 'cliente@example.com',
+    tipoSolicitud: 'Waiver GDS - Sabre',
+    reclamoIncidente: 'Error en Emisión (Amadeus - Navitaire -Sabre)',
+    solicitudCliente: 'Cliente solicita waiver para cambio de vuelo debido a error en la emisión del ticket. El sistema no permitió completar la reserva correctamente.',
+    informacionBrindada: 'Se revisó el PNR en Amadeus. Se identificó error en la tarifa aplicada. Se procedió a solicitar waiver al GDS para realizar el cambio sin penalidad.',
+    observaciones: 'Caso resuelto satisfactoriamente. Cliente confirmó recepción del nuevo ticket.',
     status: 'en-proceso',
     priority: 'alta',
     assignedTo: 'Juan Pérez',
     assignedTeam: 'Soporte GDS',
     slaDeadline: new Date('2025-01-20'),
+    initialDate: new Date('2025-01-15'),
     createdAt: new Date('2025-01-15'),
     updatedAt: new Date('2025-01-16'),
     history: [
@@ -51,31 +49,31 @@ const mockRequirements: Requirement[] = [
         date: new Date('2025-01-16'),
         action: 'Asignado a Juan Pérez - Soporte GDS',
         user: 'Admin',
-        comment: 'Prioridad alta debido a impacto en operación',
+        comment: 'Prioridad alta debido a error en emisión',
       },
     ],
-    tags: ['sabre', 'reservas', 'timeout'],
+    tags: ['amadeus', 'waiver', 'error-emision'],
   },
   {
     id: '2',
     ticketNumber: 'GDS-2025-002',
-    title: 'Consulta sobre tarifas corporativas en Amadeus',
-    requirementType: 'consulta',
-    gdsSystem: 'amadeus',
-    category: 'tarifas',
-    requesterName: 'Ana Martínez',
-    requesterEmail: 'ana.martinez@travel.com',
-    requesterPhone: '+54 11 9876-5432',
-    organization: 'Travel Express',
-    officeId: 'BUEXX09BB',
-    pcc: 'BUE123',
-    description: 'Necesito información sobre cómo configurar las tarifas corporativas negociadas para el cliente XYZ Corporation en el sistema Amadeus. No encuentro documentación actualizada.',
-    expectedResult: 'Obtener guía paso a paso para configuración de tarifas corporativas',
-    initialDate: new Date('2025-01-18'),
+    nombreAsesor: 'Sofia Guarin',
+    canalConsulta: 'SISTEMA DE DISTRIBUCIÓN GDS',
+    origenConsulta: 'GDS',
+    esSoporteIngles: true,
+    horaIngresoCorreo: '14:15',
+    pnrTktLocalizador: 'XYZ789',
+    correoElectronico: 'support@example.com',
+    tipoSolicitud: 'Remisión Voluntaria - Involuntaria',
+    reclamoIncidente: 'Alternativa por Cancelación - Demora - Sobreventa',
+    solicitudCliente: 'Passenger requests refund due to flight cancellation. Original booking was made through GDS Sabre.',
+    informacionBrindada: 'Reviewed cancellation policy. Flight was cancelled by airline. Customer eligible for full refund. Processed refund request through GDS.',
+    observaciones: 'English support case. Customer notified via email about refund timeline.',
     status: 'nuevo',
     priority: 'media',
-    assignedTeam: 'Comercial',
+    assignedTeam: 'Soporte GDS',
     slaDeadline: new Date('2025-01-25'),
+    initialDate: new Date('2025-01-18'),
     createdAt: new Date('2025-01-18'),
     updatedAt: new Date('2025-01-18'),
     history: [
@@ -86,29 +84,29 @@ const mockRequirements: Requirement[] = [
         user: 'Sistema',
       },
     ],
-    tags: ['amadeus', 'tarifas', 'corporativo'],
+    tags: ['sabre', 'refund', 'english-support'],
   },
   {
     id: '3',
     ticketNumber: 'GDS-2025-003',
-    title: 'Solicitud de acceso a reportes de auditoría',
-    requirementType: 'solicitud',
-    gdsSystem: 'sabre',
-    category: 'reportes',
-    requesterName: 'Carlos Rodríguez',
-    requesterEmail: 'carlos.rodriguez@agencia.com',
-    requesterPhone: '+54 11 5555-6666',
-    organization: 'Viajes Premium',
-    officeId: 'BUEXX10CC',
-    pcc: '8XYZ',
-    description: 'Solicito acceso a los reportes de auditoría de transacciones del último trimestre. Necesito analizar el volumen de reservas y patrones de uso del GDS.',
-    expectedResult: 'Acceso otorgado a reportes de auditoría con permisos de lectura',
-    initialDate: new Date('2025-01-10'),
+    nombreAsesor: 'José Ramos',
+    canalConsulta: 'SISTEMA DE DISTRIBUCIÓN GDS',
+    origenConsulta: 'AMADEUS',
+    esSoporteIngles: false,
+    horaIngresoCorreo: '11:00',
+    pnrTktLocalizador: 'DEF456',
+    correoElectronico: 'agencia@travel.com',
+    tipoSolicitud: 'Facturación',
+    reclamoIncidente: 'Escalamiento Finanzas - Facturación -ATO',
+    solicitudCliente: 'Agencia solicita corrección en facturación. Se cobró tarifa incorrecta en el ATO.',
+    informacionBrindada: 'Se revisó el caso con el equipo de finanzas. Se identificó error en el cargo automático. Se procesó nota de crédito para ajustar el monto.',
+    observaciones: 'Caso escalado a finanzas. Resuelto en 48 horas.',
     status: 'resuelto',
     priority: 'baja',
     assignedTo: 'Laura Sánchez',
-    assignedTeam: 'Administración',
+    assignedTeam: 'Finanzas',
     slaDeadline: new Date('2025-01-17'),
+    initialDate: new Date('2025-01-10'),
     createdAt: new Date('2025-01-10'),
     updatedAt: new Date('2025-01-14'),
     resolvedAt: new Date('2025-01-14'),
@@ -122,28 +120,30 @@ const mockRequirements: Requirement[] = [
       {
         id: '2',
         date: new Date('2025-01-11'),
-        action: 'Asignado a Laura Sánchez - Administración',
-        user: 'Admin',
+        action: 'Escalado a Finanzas',
+        user: 'José Ramos',
       },
       {
         id: '3',
         date: new Date('2025-01-14'),
         action: 'Requerimiento resuelto',
         user: 'Laura Sánchez',
-        comment: 'Acceso otorgado. Credenciales enviadas por email',
+        comment: 'Nota de crédito procesada. Cliente notificado.',
       },
     ],
-    tags: ['reportes', 'auditoría', 'acceso'],
+    tags: ['facturacion', 'finanzas', 'nota-credito'],
   },
 ];
 
 export const RequirementProvider = ({ children }: { children: ReactNode }) => {
   const [requirements, setRequirements] = useState<Requirement[]>(mockRequirements);
 
-  const addRequirement = (requirement: Omit<Requirement, 'id' | 'createdAt' | 'updatedAt' | 'history'>) => {
+  const addRequirement = (requirement: Omit<Requirement, 'id' | 'createdAt' | 'updatedAt' | 'history' | 'ticketNumber'>) => {
+    const ticketNumber = `GDS-${new Date().getFullYear()}-${String(requirements.length + 1).padStart(3, '0')}`;
     const newRequirement: Requirement = {
       ...requirement,
       id: Date.now().toString(),
+      ticketNumber,
       createdAt: new Date(),
       updatedAt: new Date(),
       history: [
@@ -151,7 +151,7 @@ export const RequirementProvider = ({ children }: { children: ReactNode }) => {
           id: '1',
           date: new Date(),
           action: 'Requerimiento creado',
-          user: 'Sistema',
+          user: requirement.nombreAsesor,
         },
       ],
     };
@@ -215,4 +215,3 @@ export const useRequirements = () => {
   }
   return context;
 };
-

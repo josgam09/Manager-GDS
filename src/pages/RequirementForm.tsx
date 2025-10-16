@@ -15,8 +15,8 @@ import {
 } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { ArrowLeft, CalendarIcon } from 'lucide-react';
-import { RequirementStatus, RequirementPriority, RequirementType, GDSSystem, RequirementCategory } from '@/types/requirement';
+import { ArrowLeft, CalendarIcon, Clock } from 'lucide-react';
+import { RequirementStatus, RequirementPriority, AsesorName, OrigenConsulta, TipoSolicitud, ReclamoIncidente } from '@/types/requirement';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -29,21 +29,18 @@ const RequirementForm = () => {
   const isEditing = !!id;
 
   const [formData, setFormData] = useState({
-    ticketNumber: '',
-    title: '',
-    requirementType: 'consulta' as RequirementType,
-    gdsSystem: 'sabre' as GDSSystem,
-    category: 'reservas' as RequirementCategory,
-    requesterName: '',
-    requesterEmail: '',
-    requesterPhone: '',
-    organization: '',
-    officeId: '',
-    pcc: '',
-    description: '',
-    expectedResult: '',
-    affectedPNR: '',
-    errorMessage: '',
+    nombreAsesor: '' as AsesorName | '',
+    canalConsulta: 'SISTEMA DE DISTRIBUCIÓN GDS' as const,
+    origenConsulta: 'GDS' as OrigenConsulta,
+    esSoporteIngles: false,
+    horaIngresoCorreo: '',
+    pnrTktLocalizador: '',
+    correoElectronico: '',
+    tipoSolicitud: '' as TipoSolicitud | '',
+    reclamoIncidente: '' as ReclamoIncidente | '',
+    solicitudCliente: '',
+    informacionBrindada: '',
+    observaciones: '',
     initialDate: new Date(),
     status: 'nuevo' as RequirementStatus,
     priority: 'media' as RequirementPriority,
@@ -57,21 +54,18 @@ const RequirementForm = () => {
       const requirement = getRequirement(id);
       if (requirement) {
         setFormData({
-          ticketNumber: requirement.ticketNumber,
-          title: requirement.title,
-          requirementType: requirement.requirementType,
-          gdsSystem: requirement.gdsSystem,
-          category: requirement.category,
-          requesterName: requirement.requesterName,
-          requesterEmail: requirement.requesterEmail,
-          requesterPhone: requirement.requesterPhone,
-          organization: requirement.organization,
-          officeId: requirement.officeId || '',
-          pcc: requirement.pcc || '',
-          description: requirement.description,
-          expectedResult: requirement.expectedResult,
-          affectedPNR: requirement.affectedPNR || '',
-          errorMessage: requirement.errorMessage || '',
+          nombreAsesor: requirement.nombreAsesor,
+          canalConsulta: requirement.canalConsulta,
+          origenConsulta: requirement.origenConsulta,
+          esSoporteIngles: requirement.esSoporteIngles,
+          horaIngresoCorreo: requirement.horaIngresoCorreo,
+          pnrTktLocalizador: requirement.pnrTktLocalizador,
+          correoElectronico: requirement.correoElectronico,
+          tipoSolicitud: requirement.tipoSolicitud,
+          reclamoIncidente: requirement.reclamoIncidente,
+          solicitudCliente: requirement.solicitudCliente,
+          informacionBrindada: requirement.informacionBrindada,
+          observaciones: requirement.observaciones,
           initialDate: requirement.initialDate,
           status: requirement.status,
           priority: requirement.priority,
@@ -86,8 +80,25 @@ const RequirementForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.requesterName || !formData.requesterEmail || !formData.description) {
-      toast.error('Por favor complete todos los campos requeridos');
+    // Validaciones
+    if (!formData.nombreAsesor) {
+      toast.error('Por favor selecciona el nombre del asesor');
+      return;
+    }
+    if (!formData.horaIngresoCorreo) {
+      toast.error('Por favor ingresa la hora de ingreso del correo');
+      return;
+    }
+    if (!formData.pnrTktLocalizador) {
+      toast.error('Por favor ingresa el PNR/TKT/Localizador');
+      return;
+    }
+    if (!formData.correoElectronico) {
+      toast.error('Por favor ingresa el correo electrónico');
+      return;
+    }
+    if (!formData.solicitudCliente) {
+      toast.error('Por favor describe la solicitud del cliente');
       return;
     }
 
@@ -96,18 +107,59 @@ const RequirementForm = () => {
       addRequirementHistory(id, 'Requerimiento actualizado', 'Información del requerimiento modificada');
       toast.success('Requerimiento actualizado exitosamente');
     } else {
-      addRequirement({
-        ...formData,
-        ticketNumber: formData.ticketNumber || `GDS-${Date.now()}`,
-      });
+      addRequirement(formData as any);
       toast.success('Requerimiento creado exitosamente');
     }
 
     navigate('/requirements');
   };
 
+  const asesores: AsesorName[] = [
+    'Jenny Andrea Taborda',
+    'Jhoan Restrepo',
+    'José Ramos',
+    'Julieth Urbina',
+    'Luz Lozada',
+    'Manuela Maz',
+    'Mauricio Rios',
+    'Nazly Lugo',
+    'Rafael Carmona',
+    'Sandra Milena Jaramillo',
+    'Sofia Guarin',
+    'Valentina Mejía',
+    'Viviana Virlen',
+  ];
+
+  const tiposSolicitud: TipoSolicitud[] = [
+    'Waiver GDS - Sabre',
+    'Waiver Comercial',
+    'Remisión Voluntaria - Involuntaria',
+    'Cesión - Cambio de Nombre Vol - Corrección',
+    'Certificado Médico',
+    'Cambio de Status (Ticket)',
+    'Opcionales - BUNDLES',
+    'Retracto (CL/BR/CO)',
+    'Política Comercial - Regulación de Emisión',
+    'Facturación',
+    'Toma de Pagos (WebPay/Portal AG/Otro)',
+  ];
+
+  const reclamosIncidentes: ReclamoIncidente[] = [
+    'Error en Emisión (Amadeus - Navitaire -Sabre)',
+    'Alternativa por Cancelación - Demora - Sobreventa',
+    'Proceso o Estado de Devolución (PW/APP/BSP/ARC)',
+    'Segmentos Pasivos - Error BUNDLE',
+    'Cobro Erróneo ATO - No corresponde',
+    'Check-in',
+    'Escalamiento Finanzas - Facturación -ATO',
+    'Ingreso APP - Error en ATO -Otro',
+    'ACM (Dev BSP/ARC/Pago Exceso)',
+    'Otro',
+    'PNR HX',
+  ];
+
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto">
       <Button onClick={() => navigate('/requirements')} variant="outline" className="gap-2">
         <ArrowLeft className="h-4 w-4" />
         Volver
@@ -116,260 +168,212 @@ const RequirementForm = () => {
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">
-            {isEditing ? 'Editar Requerimiento GDS' : 'Nuevo Requerimiento GDS'}
+            {isEditing ? 'Editar Requerimiento' : 'Nuevo Requerimiento GDS'}
           </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Canal de Consulta: Sistema de Distribución GDS
+          </p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Información General */}
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Sección 1: Información del Asesor */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold border-b pb-2">Información General</h3>
+              <h3 className="text-lg font-semibold border-b pb-2">Información del Asesor</h3>
               
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="ticketNumber">Número de Ticket</Label>
-                  <Input
-                    id="ticketNumber"
-                    value={formData.ticketNumber}
-                    onChange={(e) => setFormData({ ...formData, ticketNumber: e.target.value })}
-                    placeholder="GDS-2025-001 (autogenerado si se deja vacío)"
-                  />
+                  <Label htmlFor="nombreAsesor">Nombre del Asesor *</Label>
+                  <Select
+                    value={formData.nombreAsesor}
+                    onValueChange={(value) => setFormData({ ...formData, nombreAsesor: value as AsesorName })}
+                  >
+                    <SelectTrigger id="nombreAsesor">
+                      <SelectValue placeholder="Selecciona un asesor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {asesores.map((asesor) => (
+                        <SelectItem key={asesor} value={asesor}>
+                          {asesor}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="title">Título del Requerimiento *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Breve descripción del requerimiento"
-                    required
-                  />
+                  <Label htmlFor="horaIngresoCorreo">Hora de Ingreso del Correo (HH:MM) *</Label>
+                  <div className="relative">
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="horaIngresoCorreo"
+                      type="time"
+                      value={formData.horaIngresoCorreo}
+                      onChange={(e) => setFormData({ ...formData, horaIngresoCorreo: e.target.value })}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div className="grid gap-4 md:grid-cols-3">
+            {/* Sección 2: Origen y Canal */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">Origen de la Consulta</h3>
+              
+              <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="requirementType">Tipo de Requerimiento</Label>
+                  <Label htmlFor="origenConsulta">Origen Consulta</Label>
                   <Select
-                    value={formData.requirementType}
-                    onValueChange={(value) => setFormData({ ...formData, requirementType: value as RequirementType })}
+                    value={formData.origenConsulta}
+                    onValueChange={(value) => setFormData({ ...formData, origenConsulta: value as OrigenConsulta })}
                   >
-                    <SelectTrigger id="requirementType">
+                    <SelectTrigger id="origenConsulta">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="consulta">Consulta</SelectItem>
-                      <SelectItem value="incidencia">Incidencia</SelectItem>
-                      <SelectItem value="solicitud">Solicitud</SelectItem>
-                      <SelectItem value="configuracion">Configuración</SelectItem>
-                      <SelectItem value="reportes">Reportes</SelectItem>
-                      <SelectItem value="otro">Otro</SelectItem>
+                      <SelectItem value="GDS">GDS</SelectItem>
+                      <SelectItem value="AMADEUS">AMADEUS</SelectItem>
+                      <SelectItem value="NO CORRESPONDE">NO CORRESPONDE</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="gdsSystem">Sistema GDS *</Label>
+                  <Label htmlFor="esSoporteIngles">¿El Origen Email es Soporte Inglés?</Label>
                   <Select
-                    value={formData.gdsSystem}
-                    onValueChange={(value) => setFormData({ ...formData, gdsSystem: value as GDSSystem })}
+                    value={formData.esSoporteIngles ? 'Si' : 'No'}
+                    onValueChange={(value) => setFormData({ ...formData, esSoporteIngles: value === 'Si' })}
                   >
-                    <SelectTrigger id="gdsSystem">
+                    <SelectTrigger id="esSoporteIngles">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="sabre">Sabre</SelectItem>
-                      <SelectItem value="amadeus">Amadeus</SelectItem>
-                      <SelectItem value="travelport">Travelport</SelectItem>
-                      <SelectItem value="sirena">Sirena</SelectItem>
-                      <SelectItem value="otro">Otro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="category">Categoría</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) => setFormData({ ...formData, category: value as RequirementCategory })}
-                  >
-                    <SelectTrigger id="category">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="reservas">Reservas</SelectItem>
-                      <SelectItem value="tarifas">Tarifas</SelectItem>
-                      <SelectItem value="disponibilidad">Disponibilidad</SelectItem>
-                      <SelectItem value="pnr">PNR</SelectItem>
-                      <SelectItem value="tickets">Tickets</SelectItem>
-                      <SelectItem value="reportes">Reportes</SelectItem>
-                      <SelectItem value="accesos">Accesos</SelectItem>
-                      <SelectItem value="capacitacion">Capacitación</SelectItem>
-                      <SelectItem value="otro">Otro</SelectItem>
+                      <SelectItem value="Si">Sí</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
             </div>
 
-            {/* Información del Solicitante */}
+            {/* Sección 3: Datos del Cliente */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold border-b pb-2">Información del Solicitante</h3>
+              <h3 className="text-lg font-semibold border-b pb-2">Datos del Cliente</h3>
               
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="requesterName">Nombre del Solicitante *</Label>
+                  <Label htmlFor="pnrTktLocalizador">PNR - TKT - Localizador AMADEUS-SABRE *</Label>
                   <Input
-                    id="requesterName"
-                    value={formData.requesterName}
-                    onChange={(e) => setFormData({ ...formData, requesterName: e.target.value })}
-                    placeholder="Nombre completo"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="organization">Organización/Agencia</Label>
-                  <Input
-                    id="organization"
-                    value={formData.organization}
-                    onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                    placeholder="Nombre de la agencia o empresa"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="requesterEmail">Email del Solicitante *</Label>
-                  <Input
-                    id="requesterEmail"
-                    type="email"
-                    value={formData.requesterEmail}
-                    onChange={(e) => setFormData({ ...formData, requesterEmail: e.target.value })}
-                    placeholder="email@ejemplo.com"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="requesterPhone">Teléfono</Label>
-                  <Input
-                    id="requesterPhone"
-                    type="tel"
-                    value={formData.requesterPhone}
-                    onChange={(e) => setFormData({ ...formData, requesterPhone: e.target.value })}
-                    placeholder="+54 11 1234-5678"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="officeId">Office ID (GDS)</Label>
-                  <Input
-                    id="officeId"
-                    value={formData.officeId}
-                    onChange={(e) => setFormData({ ...formData, officeId: e.target.value })}
-                    placeholder="BUEXX08AA"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="pcc">PCC (Pseudo City Code)</Label>
-                  <Input
-                    id="pcc"
-                    value={formData.pcc}
-                    onChange={(e) => setFormData({ ...formData, pcc: e.target.value })}
-                    placeholder="4TL8"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Detalles del Requerimiento */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold border-b pb-2">Detalles del Requerimiento</h3>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Descripción Detallada *</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describa en detalle el requerimiento o incidencia..."
-                  rows={5}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="expectedResult">Resultado Esperado / Solución Requerida *</Label>
-                <Textarea
-                  id="expectedResult"
-                  value={formData.expectedResult}
-                  onChange={(e) => setFormData({ ...formData, expectedResult: e.target.value })}
-                  placeholder="¿Qué resultado o solución espera obtener?"
-                  rows={3}
-                  required
-                />
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="affectedPNR">PNR Afectado (si aplica)</Label>
-                  <Input
-                    id="affectedPNR"
-                    value={formData.affectedPNR}
-                    onChange={(e) => setFormData({ ...formData, affectedPNR: e.target.value })}
+                    id="pnrTktLocalizador"
+                    value={formData.pnrTktLocalizador}
+                    onChange={(e) => setFormData({ ...formData, pnrTktLocalizador: e.target.value })}
                     placeholder="ABC123"
+                    required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="initialDate">Fecha del Requerimiento</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !formData.initialDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formData.initialDate ? format(formData.initialDate, "PPP", { locale: es }) : "Seleccione una fecha"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={formData.initialDate}
-                        onSelect={(date) => date && setFormData({ ...formData, initialDate: date })}
-                        initialFocus
-                        className="pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Label htmlFor="correoElectronico">Correo Electrónico *</Label>
+                  <Input
+                    id="correoElectronico"
+                    type="email"
+                    value={formData.correoElectronico}
+                    onChange={(e) => setFormData({ ...formData, correoElectronico: e.target.value })}
+                    placeholder="cliente@ejemplo.com"
+                    required
+                  />
                 </div>
+              </div>
+            </div>
+
+            {/* Sección 4: Tipo de Solicitud y Reclamos */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">Clasificación del Requerimiento</h3>
+              
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="tipoSolicitud">Tipo de Solicitud</Label>
+                  <Select
+                    value={formData.tipoSolicitud}
+                    onValueChange={(value) => setFormData({ ...formData, tipoSolicitud: value as TipoSolicitud })}
+                  >
+                    <SelectTrigger id="tipoSolicitud">
+                      <SelectValue placeholder="Selecciona un tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tiposSolicitud.map((tipo) => (
+                        <SelectItem key={tipo} value={tipo}>
+                          {tipo}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="reclamoIncidente">Reclamos / Incidentes</Label>
+                  <Select
+                    value={formData.reclamoIncidente}
+                    onValueChange={(value) => setFormData({ ...formData, reclamoIncidente: value as ReclamoIncidente })}
+                  >
+                    <SelectTrigger id="reclamoIncidente">
+                      <SelectValue placeholder="Selecciona una opción" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {reclamosIncidentes.map((reclamo) => (
+                        <SelectItem key={reclamo} value={reclamo}>
+                          {reclamo}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Sección 5: Detalles de la Solicitud */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">Detalles de la Solicitud</h3>
+
+              <div className="space-y-2">
+                <Label htmlFor="solicitudCliente">Solicitud del Cliente *</Label>
+                <Textarea
+                  id="solicitudCliente"
+                  value={formData.solicitudCliente}
+                  onChange={(e) => setFormData({ ...formData, solicitudCliente: e.target.value })}
+                  placeholder="Describe la solicitud del cliente en detalle..."
+                  rows={4}
+                  required
+                />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="errorMessage">Mensaje de Error (si aplica)</Label>
+                <Label htmlFor="informacionBrindada">Información Brindada</Label>
                 <Textarea
-                  id="errorMessage"
-                  value={formData.errorMessage}
-                  onChange={(e) => setFormData({ ...formData, errorMessage: e.target.value })}
-                  placeholder="Copie aquí el mensaje de error del sistema GDS"
+                  id="informacionBrindada"
+                  value={formData.informacionBrindada}
+                  onChange={(e) => setFormData({ ...formData, informacionBrindada: e.target.value })}
+                  placeholder="Información o respuesta brindada al cliente..."
+                  rows={4}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="observaciones">Observaciones y/otros</Label>
+                <Textarea
+                  id="observaciones"
+                  value={formData.observaciones}
+                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                  placeholder="Observaciones adicionales..."
                   rows={3}
                 />
               </div>
             </div>
 
-            {/* Estado y Gestión */}
+            {/* Sección 6: Gestión Interna */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold border-b pb-2">Estado y Gestión</h3>
+              <h3 className="text-lg font-semibold border-b pb-2">Gestión Interna</h3>
 
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
@@ -416,14 +420,14 @@ const RequirementForm = () => {
                     onValueChange={(value) => setFormData({ ...formData, assignedTeam: value })}
                   >
                     <SelectTrigger id="assignedTeam">
-                      <SelectValue placeholder="Seleccione un equipo" />
+                      <SelectValue placeholder="Selecciona un equipo" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">Sin asignar</SelectItem>
                       <SelectItem value="Soporte GDS">Soporte GDS</SelectItem>
                       <SelectItem value="Desarrollo">Desarrollo</SelectItem>
                       <SelectItem value="Comercial">Comercial</SelectItem>
-                      <SelectItem value="Administración">Administración</SelectItem>
+                      <SelectItem value="Finanzas">Finanzas</SelectItem>
                       <SelectItem value="Capacitación">Capacitación</SelectItem>
                     </SelectContent>
                   </Select>
@@ -470,11 +474,11 @@ const RequirementForm = () => {
               </div>
             </div>
 
-            <div className="flex gap-4 justify-end pt-4">
+            <div className="flex gap-4 justify-end pt-4 border-t">
               <Button type="button" variant="outline" onClick={() => navigate('/requirements')}>
                 Cancelar
               </Button>
-              <Button type="submit">
+              <Button type="submit" size="lg">
                 {isEditing ? 'Actualizar Requerimiento' : 'Crear Requerimiento'}
               </Button>
             </div>
@@ -486,4 +490,3 @@ const RequirementForm = () => {
 };
 
 export default RequirementForm;
-
