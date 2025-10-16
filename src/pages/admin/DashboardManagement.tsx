@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, BarChartPlus, BarChart, Trash2 } from 'lucide-react';
+import { ArrowLeft, PlusCircle, BarChart, Trash2 } from 'lucide-react';
 import { UserRole } from '@/types/user';
 import { toast } from 'sonner';
 
@@ -149,7 +149,7 @@ const DashboardManagement = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BarChartPlus className="h-5 w-5" />
+            <PlusCircle className="h-5 w-5" />
             Crear Nuevo Dashboard
           </CardTitle>
         </CardHeader>
@@ -213,7 +213,7 @@ const DashboardManagement = () => {
             </div>
 
             <Button type="submit" className="gap-2">
-              <BarChartPlus className="h-4 w-4" />
+              <PlusCircle className="h-4 w-4" />
               Crear Dashboard
             </Button>
           </form>

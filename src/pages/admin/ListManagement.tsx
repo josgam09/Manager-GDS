@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, ListPlus, List as ListIcon, Trash2, Plus, X } from 'lucide-react';
+import { ArrowLeft, PlusCircle, List as ListIcon, Trash2, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 type ListCategory = 'requerimiento' | 'asignacion' | 'escalamiento' | 'sistema';
@@ -122,7 +122,7 @@ const ListManagement = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ListPlus className="h-5 w-5" />
+            <PlusCircle className="h-5 w-5" />
             Crear Nueva Lista
           </CardTitle>
         </CardHeader>
@@ -166,7 +166,7 @@ const ListManagement = () => {
               </div>
             </div>
             <Button type="submit" className="gap-2">
-              <ListPlus className="h-4 w-4" />
+              <PlusCircle className="h-4 w-4" />
               Crear Lista
             </Button>
           </form>
