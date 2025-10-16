@@ -142,6 +142,33 @@ const RequirementDetail = () => {
                   </div>
                 </>
               )}
+
+              {/* Información de Escalamiento */}
+              {!requirement.puedeEntregarInformacion && (
+                <>
+                  <Separator />
+                  <div className="p-4 bg-warning/10 rounded-lg border border-warning/20">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-warning" />
+                      Caso Escalado
+                    </h3>
+                    <div className="space-y-2 text-sm">
+                      <p>
+                        <strong>Motivo:</strong> El analista no pudo entregar la información requerida
+                      </p>
+                      <p>
+                        <strong>Escalado a:</strong>{' '}
+                        <Badge variant={requirement.escaladoA === 'SUPERVISOR' ? 'default' : 'secondary'}>
+                          {requirement.escaladoA === 'SUPERVISOR' ? 'SUPERVISOR' : `OTRA ÁREA: ${requirement.nombreAreaEscalamiento}`}
+                        </Badge>
+                      </p>
+                      <p className="text-muted-foreground italic">
+                        Este caso requiere atención de {requirement.escaladoA === 'SUPERVISOR' ? 'un supervisor' : `el área de ${requirement.nombreAreaEscalamiento}`}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 

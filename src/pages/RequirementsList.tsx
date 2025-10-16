@@ -145,6 +145,8 @@ const RequirementsList = () => {
                 <SelectItem value="nuevo">Nuevo</SelectItem>
                 <SelectItem value="en-proceso">En Proceso</SelectItem>
                 <SelectItem value="pendiente-informacion">Pendiente Info</SelectItem>
+                <SelectItem value="pendiente-supervisor">Pendiente Supervisor</SelectItem>
+                <SelectItem value="pendiente-otra-area">Pendiente Otra Área</SelectItem>
                 <SelectItem value="resuelto">Resuelto</SelectItem>
                 <SelectItem value="cerrado">Cerrado</SelectItem>
               </SelectContent>

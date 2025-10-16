@@ -25,6 +25,9 @@ const RequirementFormSimple = () => {
   const [tipoSolicitud, setTipoSolicitud] = useState('');
   const [reclamoIncidente, setReclamoIncidente] = useState('');
   const [solicitudCliente, setSolicitudCliente] = useState('');
+  const [puedeEntregarInformacion, setPuedeEntregarInformacion] = useState('Si');
+  const [escaladoA, setEscaladoA] = useState('');
+  const [nombreAreaEscalamiento, setNombreAreaEscalamiento] = useState('');
   const [informacionBrindada, setInformacionBrindada] = useState('');
   const [observaciones, setObservaciones] = useState('');
   const [availableScripts, setAvailableScripts] = useState<ResponseScript[]>([]);
@@ -57,6 +60,28 @@ const RequirementFormSimple = () => {
       return;
     }
 
+    // Validar escalamiento
+    if (puedeEntregarInformacion === 'No') {
+      if (!escaladoA) {
+        toast.error('Por favor selecciona a quién escalar el caso');
+        return;
+      }
+      if (escaladoA === 'OTRA_AREA' && !nombreAreaEscalamiento) {
+        toast.error('Por favor indica el nombre del área a escalar');
+        return;
+      }
+    }
+
+    // Determinar el estado según escalamiento
+    let estadoInicial: any = 'nuevo';
+    if (puedeEntregarInformacion === 'No') {
+      if (escaladoA === 'SUPERVISOR') {
+        estadoInicial = 'pendiente-supervisor';
+      } else if (escaladoA === 'OTRA_AREA') {
+        estadoInicial = 'pendiente-otra-area';
+      }
+    }
+
     const newRequirement = {
       nombreAsesor: nombreAsesor as any,
       canalConsulta: 'SISTEMA DE DISTRIBUCIÓN GDS' as const,
@@ -68,13 +93,16 @@ const RequirementFormSimple = () => {
       tipoSolicitud: tipoSolicitud as any,
       reclamoIncidente: reclamoIncidente as any,
       solicitudCliente,
+      puedeEntregarInformacion: puedeEntregarInformacion === 'Si',
+      escaladoA: escaladoA as any,
+      nombreAreaEscalamiento: nombreAreaEscalamiento || undefined,
       informacionBrindada,
       observaciones,
       initialDate: new Date(),
-      status: 'nuevo' as const,
+      status: estadoInicial,
       priority: 'media' as const,
       assignedTo: '',
-      assignedTeam: '',
+      assignedTeam: escaladoA === 'OTRA_AREA' ? nombreAreaEscalamiento : '',
     };
 
     addRequirement(newRequirement as any);
@@ -260,6 +288,93 @@ const RequirementFormSimple = () => {
                   required
                 />
               </div>
+            </div>
+
+            {/* Sección 6: Control de Escalamiento */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">6. Control de Información</h3>
+              
+              <div className="space-y-4 p-4 border rounded-lg bg-accent/50">
+                <div className="space-y-2">
+                  <Label className="text-base font-semibold">¿Puedo Entregar Información Requerida? *</Label>
+                  <Select value={puedeEntregarInformacion} onValueChange={setPuedeEntregarInformacion}>
+                    <SelectTrigger className="w-full md:w-1/2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Si">Sí</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Opciones de Escalamiento - Solo si NO puede entregar información */}
+                {puedeEntregarInformacion === 'No' && (
+                  <div className="space-y-4 p-4 border-2 border-warning rounded-lg bg-warning/5">
+                    <div className="flex items-start gap-2">
+                      <span className="text-warning text-2xl">⚠️</span>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-warning mb-2">Escalamiento Requerido</h4>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Si no puedes entregar la información, debes escalar el caso a un supervisor o a otra área especializada.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Escalar a: *</Label>
+                      <Select value={escaladoA} onValueChange={setEscaladoA}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona opción de escalamiento" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="SUPERVISOR">SUPERVISOR</SelectItem>
+                          <SelectItem value="OTRA_AREA">OTRA ÁREA</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Campo para nombre del área - Solo si escaladoA es OTRA_AREA */}
+                    {escaladoA === 'OTRA_AREA' && (
+                      <div className="space-y-2">
+                        <Label>Nombre del Área a Escalar: *</Label>
+                        <Input
+                          value={nombreAreaEscalamiento}
+                          onChange={(e) => setNombreAreaEscalamiento(e.target.value)}
+                          placeholder="Ej: Finanzas, Comercial, Desarrollo, etc."
+                          required
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Especifica el nombre del área o departamento que debe atender este caso
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="p-3 bg-primary/5 rounded-md border border-primary/20">
+                      <p className="text-sm">
+                        <strong>Estado resultante:</strong>{' '}
+                        {escaladoA === 'SUPERVISOR' && (
+                          <span className="text-orange-600 font-semibold">PENDIENTE SUPERVISOR</span>
+                        )}
+                        {escaladoA === 'OTRA_AREA' && nombreAreaEscalamiento && (
+                          <span className="text-purple-600 font-semibold">
+                            PENDIENTE OTRA ÁREA ({nombreAreaEscalamiento})
+                          </span>
+                        )}
+                        {!escaladoA && (
+                          <span className="text-muted-foreground">Selecciona una opción de escalamiento</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Sección 7: Información Brindada (Solo si puede entregarla) */}
+            {puedeEntregarInformacion === 'Si' && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">7. Información Brindada</h3>
 
               <div className="space-y-2">
                 <Label>Información Brindada</Label>
@@ -285,13 +400,19 @@ const RequirementFormSimple = () => {
                   💡 Puedes usar los scripts sugeridos arriba según el tipo de solicitud o reclamo seleccionado
                 </p>
               </div>
+            </div>
+            )}
+
+            {/* Sección 8: Observaciones */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">{puedeEntregarInformacion === 'Si' ? '8' : '7'}. Observaciones Adicionales</h3>
 
               <div className="space-y-2">
                 <Label>Observaciones</Label>
                 <Textarea
                   value={observaciones}
                   onChange={(e) => setObservaciones(e.target.value)}
-                  placeholder="Observaciones adicionales..."
+                  placeholder="Observaciones adicionales, notas internas, etc."
                   rows={3}
                 />
               </div>

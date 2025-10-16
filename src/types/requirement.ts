@@ -1,4 +1,11 @@
-export type RequirementStatus = 'nuevo' | 'en-proceso' | 'pendiente-informacion' | 'resuelto' | 'cerrado';
+export type RequirementStatus = 
+  | 'nuevo' 
+  | 'en-proceso' 
+  | 'pendiente-informacion' 
+  | 'pendiente-supervisor' 
+  | 'pendiente-otra-area' 
+  | 'resuelto' 
+  | 'cerrado';
 export type RequirementPriority = 'baja' | 'media' | 'alta' | 'critica';
 
 // Nombre del Asesor
@@ -59,6 +66,12 @@ export interface RequirementHistory {
   comment?: string;
 }
 
+// Tipos de Usuario del Sistema
+export type UserRole = 'ANALISTA' | 'SUPERVISOR' | 'ADMINISTRADOR';
+
+// Opciones de Escalamiento
+export type EscalationOption = 'SUPERVISOR' | 'OTRA_AREA';
+
 export interface Requirement {
   id: string;
   ticketNumber: string; // Número de ticket/caso autogenerado
@@ -74,6 +87,12 @@ export interface Requirement {
   tipoSolicitud: TipoSolicitud | '';
   reclamoIncidente: ReclamoIncidente | '';
   solicitudCliente: string; // Texto largo
+  
+  // Control de escalamiento
+  puedeEntregarInformacion: boolean; // Si/No - Nueva pregunta
+  escaladoA?: EscalationOption; // SUPERVISOR | OTRA_AREA
+  nombreAreaEscalamiento?: string; // Nombre del área si es OTRA_AREA
+  
   informacionBrindada: string; // Texto largo
   observaciones: string; // Texto largo
   
