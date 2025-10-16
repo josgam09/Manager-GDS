@@ -61,6 +61,14 @@ const RequirementFormSimple = () => {
       return;
     }
 
+    // Validar si puede entregar información
+    if (puedeEntregarInformacion === 'Si') {
+      if (!informacionBrindada.trim()) {
+        toast.error('Por favor proporciona la información brindada al cliente antes de crear y cerrar el caso');
+        return;
+      }
+    }
+
     // Validar escalamiento
     if (puedeEntregarInformacion === 'No') {
       if (!escaladoA) {
@@ -77,9 +85,14 @@ const RequirementFormSimple = () => {
       }
     }
 
-    // Determinar el estado según escalamiento
+    // Determinar el estado según si puede entregar información
     let estadoInicial: any = 'nuevo';
-    if (puedeEntregarInformacion === 'No') {
+    
+    if (puedeEntregarInformacion === 'Si') {
+      // Si puede entregar información, crear y cerrar directamente
+      estadoInicial = 'cerrado';
+    } else if (puedeEntregarInformacion === 'No') {
+      // Si no puede, escalar según selección
       if (escaladoA === 'SUPERVISOR') {
         estadoInicial = 'pendiente-supervisor';
       } else if (escaladoA === 'OTRA_AREA') {
@@ -109,10 +122,17 @@ const RequirementFormSimple = () => {
       priority: 'media' as const,
       assignedTo: '',
       assignedTeam: escaladoA === 'OTRA_AREA' ? nombreAreaEscalamiento : '',
+      resolvedAt: estadoInicial === 'cerrado' ? new Date() : undefined,
     };
 
     addRequirement(newRequirement as any);
-    toast.success('Requerimiento creado exitosamente');
+    
+    if (estadoInicial === 'cerrado') {
+      toast.success('✅ Requerimiento creado y cerrado exitosamente');
+    } else {
+      toast.success('Requerimiento creado exitosamente');
+    }
+    
     navigate('/requirements');
   };
 
@@ -452,10 +472,30 @@ const RequirementFormSimple = () => {
               <Button type="button" variant="outline" onClick={() => navigate('/requirements')}>
                 Cancelar
               </Button>
-              <Button type="submit" size="lg">
-                Crear Requerimiento
+              <Button 
+                type="submit" 
+                size="lg"
+                className={puedeEntregarInformacion === 'Si' ? 'bg-success hover:bg-success/90' : ''}
+              >
+                {puedeEntregarInformacion === 'Si' ? (
+                  <>
+                    ✅ Crear y Cerrar Caso
+                  </>
+                ) : (
+                  'Crear Requerimiento'
+                )}
               </Button>
             </div>
+            
+            {/* Información del botón */}
+            {puedeEntregarInformacion === 'Si' && (
+              <div className="p-3 bg-success/10 border border-success/20 rounded-lg text-sm">
+                <p className="font-semibold text-success mb-1">ℹ️ Crear y Cerrar Automáticamente</p>
+                <p className="text-xs text-muted-foreground">
+                  Al hacer click, el requerimiento se creará con estado <strong>CERRADO</strong> ya que proporcionaste la información necesaria al cliente.
+                </p>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>
