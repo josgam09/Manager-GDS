@@ -210,3 +210,4 @@ Para agregar más scripts o modificar los existentes:
 **Versión**: 1.0.0  
 **Fecha**: 16 de Octubre, 2025
 
+

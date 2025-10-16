@@ -297,3 +297,4 @@ Manager-GDS-Project/
 **Autor**: Jose Gamez (@josgam09)  
 **Estado**: ✅ En desarrollo activo
 
+

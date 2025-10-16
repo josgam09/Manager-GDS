@@ -24,3 +24,4 @@ const RequirementPriorityBadge = ({ priority }: RequirementPriorityBadgeProps) =
 
 export default RequirementPriorityBadge;
 
+

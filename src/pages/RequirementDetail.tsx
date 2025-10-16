@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import RequirementStatusBadge from '@/components/RequirementStatusBadge';
 import RequirementPriorityBadge from '@/components/RequirementPriorityBadge';
-import { ArrowLeft, Mail, Phone, User, Calendar, Clock, Server, Building2, Home } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, User, Calendar, Clock, Server, Building2, Home, AlertTriangle } from 'lucide-react';
 
 const RequirementDetail = () => {
   const { id } = useParams<{ id: string }>();

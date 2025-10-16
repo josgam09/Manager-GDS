@@ -1251,3 +1251,4 @@ export function getScriptsStats() {
 // Exportar scripts combinados de ambos archivos
 export { tipoSolicitudScripts, reclamoIncidenteScripts };
 
+
