@@ -4,6 +4,7 @@ import { useRequirements } from '@/contexts/RequirementContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -13,65 +14,64 @@ import {
 } from '@/components/ui/select';
 import RequirementStatusBadge from '@/components/RequirementStatusBadge';
 import RequirementPriorityBadge from '@/components/RequirementPriorityBadge';
-import GDSSystemBadge from '@/components/GDSSystemBadge';
-import { Plus, Search, Download } from 'lucide-react';
-import { RequirementStatus, RequirementPriority, GDSSystem } from '@/types/requirement';
+import { Plus, Search, Download, Home } from 'lucide-react';
+import { RequirementStatus, RequirementPriority, OrigenConsulta } from '@/types/requirement';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const RequirementsList = () => {
+  const navigate = useNavigate();
   const { requirements } = useRequirements();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<RequirementStatus | 'all'>('all');
   const [priorityFilter, setPriorityFilter] = useState<RequirementPriority | 'all'>('all');
-  const [gdsFilter, setGdsFilter] = useState<GDSSystem | 'all'>('all');
+  const [origenFilter, setOrigenFilter] = useState<OrigenConsulta | 'all'>('all');
 
   const filteredRequirements = useMemo(() => {
     return requirements.filter((requirement) => {
       const matchesSearch =
-        requirement.title.toLowerCase().includes(search.toLowerCase()) ||
-        requirement.requesterName.toLowerCase().includes(search.toLowerCase()) ||
-        requirement.description.toLowerCase().includes(search.toLowerCase()) ||
+        requirement.nombreAsesor.toLowerCase().includes(search.toLowerCase()) ||
+        requirement.solicitudCliente.toLowerCase().includes(search.toLowerCase()) ||
         requirement.ticketNumber.toLowerCase().includes(search.toLowerCase()) ||
-        requirement.organization.toLowerCase().includes(search.toLowerCase()) ||
-        (requirement.affectedPNR && requirement.affectedPNR.toLowerCase().includes(search.toLowerCase()));
+        requirement.pnrTktLocalizador.toLowerCase().includes(search.toLowerCase()) ||
+        requirement.correoElectronico.toLowerCase().includes(search.toLowerCase()) ||
+        (requirement.tipoSolicitud && requirement.tipoSolicitud.toLowerCase().includes(search.toLowerCase())) ||
+        (requirement.reclamoIncidente && requirement.reclamoIncidente.toLowerCase().includes(search.toLowerCase()));
       
       const matchesStatus = statusFilter === 'all' || requirement.status === statusFilter;
       const matchesPriority = priorityFilter === 'all' || requirement.priority === priorityFilter;
-      const matchesGDS = gdsFilter === 'all' || requirement.gdsSystem === gdsFilter;
+      const matchesOrigen = origenFilter === 'all' || requirement.origenConsulta === origenFilter;
 
-      return matchesSearch && matchesStatus && matchesPriority && matchesGDS;
+      return matchesSearch && matchesStatus && matchesPriority && matchesOrigen;
     });
-  }, [requirements, search, statusFilter, priorityFilter, gdsFilter]);
+  }, [requirements, search, statusFilter, priorityFilter, origenFilter]);
 
   const exportToCSV = () => {
     const headers = [
-      'Ticket', 'Título', 'Tipo', 'Sistema GDS', 'Categoría', 'Solicitante', 
-      'Email', 'Teléfono', 'Organización', 'Office ID', 'PCC', 'PNR Afectado',
-      'Estado', 'Prioridad', 'Asignado a', 'Equipo', 'Fecha Inicial', 
-      'Fecha SLA', 'Fecha Creación', 'Última Actualización'
+      'Ticket', 'Asesor', 'Origen', 'Soporte Inglés', 'Hora Ingreso',
+      'PNR/TKT/Localizador', 'Email', 'Tipo Solicitud', 'Reclamo/Incidente',
+      'Solicitud Cliente', 'Información Brindada', 'Observaciones',
+      'Estado', 'Prioridad', 'Asignado a', 'Equipo', 'Fecha'
     ];
     
     const rows = filteredRequirements.map(req => [
       req.ticketNumber,
-      req.title,
-      req.requirementType,
-      req.gdsSystem,
-      req.category,
-      req.requesterName,
-      req.requesterEmail,
-      req.requesterPhone || '',
-      req.organization || '',
-      req.officeId || '',
-      req.pcc || '',
-      req.affectedPNR || '',
+      req.nombreAsesor,
+      req.origenConsulta,
+      req.esSoporteIngles ? 'Sí' : 'No',
+      req.horaIngresoCorreo,
+      req.pnrTktLocalizador,
+      req.correoElectronico,
+      req.tipoSolicitud || '',
+      req.reclamoIncidente || '',
+      req.solicitudCliente,
+      req.informacionBrindada || '',
+      req.observaciones || '',
       req.status,
       req.priority,
       req.assignedTo || '',
       req.assignedTeam || '',
       new Date(req.initialDate).toLocaleDateString('es-AR'),
-      req.slaDeadline ? new Date(req.slaDeadline).toLocaleDateString('es-AR') : '',
-      new Date(req.createdAt).toLocaleString('es-AR'),
-      new Date(req.updatedAt).toLocaleString('es-AR'),
     ]);
 
     const csvContent = [
@@ -94,11 +94,17 @@ const RequirementsList = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-4">
         <div>
+          <div className="flex gap-2 mb-2">
+            <Button onClick={() => navigate('/')} variant="outline" size="sm" className="gap-2">
+              <Home className="h-4 w-4" />
+              Inicio
+            </Button>
+          </div>
           <h1 className="text-3xl font-bold tracking-tight">Gestión de Requerimientos GDS</h1>
           <p className="text-muted-foreground mt-1">
-            Administra y da seguimiento a todos los requerimientos GDS
+            Administra y da seguimiento a todos los requerimientos
           </p>
         </div>
         <div className="flex gap-2">
@@ -155,17 +161,15 @@ const RequirementsList = () => {
                 <SelectItem value="critica">Crítica</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={gdsFilter} onValueChange={(value) => setGdsFilter(value as GDSSystem | 'all')}>
+            <Select value={origenFilter} onValueChange={(value) => setOrigenFilter(value as OrigenConsulta | 'all')}>
               <SelectTrigger>
-                <SelectValue placeholder="Sistema GDS" />
+                <SelectValue placeholder="Origen" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los sistemas</SelectItem>
-                <SelectItem value="sabre">Sabre</SelectItem>
-                <SelectItem value="amadeus">Amadeus</SelectItem>
-                <SelectItem value="travelport">Travelport</SelectItem>
-                <SelectItem value="sirena">Sirena</SelectItem>
-                <SelectItem value="otro">Otro</SelectItem>
+                <SelectItem value="all">Todos los orígenes</SelectItem>
+                <SelectItem value="GDS">GDS</SelectItem>
+                <SelectItem value="AMADEUS">AMADEUS</SelectItem>
+                <SelectItem value="NO CORRESPONDE">NO CORRESPONDE</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -183,6 +187,9 @@ const RequirementsList = () => {
             {filteredRequirements.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">No se encontraron requerimientos</p>
+                <Link to="/requirements/new">
+                  <Button className="mt-4">Crear Primer Requerimiento</Button>
+                </Link>
               </div>
             ) : (
               filteredRequirements.map((requirement) => (
@@ -193,45 +200,37 @@ const RequirementsList = () => {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded">
                           {requirement.ticketNumber}
                         </span>
-                        <h3 className="font-semibold">{requirement.title}</h3>
+                        <Badge variant="outline" className="text-xs">
+                          {requirement.origenConsulta}
+                        </Badge>
+                        {requirement.esSoporteIngles && (
+                          <Badge variant="secondary" className="text-xs">EN</Badge>
+                        )}
                       </div>
+                      <h3 className="font-semibold mb-1">
+                        {requirement.tipoSolicitud || requirement.reclamoIncidente || 'Requerimiento GDS'}
+                      </h3>
                       <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                        {requirement.description}
+                        {requirement.solicitudCliente}
                       </p>
                       <div className="flex flex-wrap items-center gap-2 text-sm">
                         <RequirementStatusBadge status={requirement.status} />
                         <RequirementPriorityBadge priority={requirement.priority} />
-                        <GDSSystemBadge system={requirement.gdsSystem} />
                         <span className="text-muted-foreground">•</span>
-                        <span className="text-muted-foreground">{requirement.organization}</span>
-                        {requirement.affectedPNR && (
-                          <>
-                            <span className="text-muted-foreground">•</span>
-                            <span className="text-muted-foreground">PNR: {requirement.affectedPNR}</span>
-                          </>
-                        )}
-                        {requirement.assignedTo && (
-                          <>
-                            <span className="text-muted-foreground">•</span>
-                            <span className="text-muted-foreground">Asignado: {requirement.assignedTo}</span>
-                          </>
-                        )}
+                        <span className="text-muted-foreground">PNR: {requirement.pnrTktLocalizador}</span>
+                        <span className="text-muted-foreground">•</span>
+                        <span className="text-muted-foreground">Asesor: {requirement.nombreAsesor}</span>
                       </div>
                     </div>
                     <div className="text-right text-sm text-muted-foreground whitespace-nowrap">
                       <div>{new Date(requirement.initialDate).toLocaleDateString('es-AR')}</div>
                       <div className="text-xs mt-1">
-                        {new Date(requirement.createdAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+                        {requirement.horaIngresoCorreo}
                       </div>
-                      {requirement.slaDeadline && (
-                        <div className="text-xs mt-1 text-warning">
-                          SLA: {new Date(requirement.slaDeadline).toLocaleDateString('es-AR')}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </Link>
@@ -245,4 +244,3 @@ const RequirementsList = () => {
 };
 
 export default RequirementsList;
-
