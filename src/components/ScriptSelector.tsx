@@ -80,12 +80,20 @@ const ScriptSelector = ({ scripts, onSelectScript, disabled }: ScriptSelectorPro
                   <div className="flex items-center gap-2 mb-1">
                     <FileText className="h-4 w-4" />
                     <span className="font-semibold">{script.title}</span>
+                    {script.gdsSystem && (
+                      <Badge 
+                        variant={script.gdsSystem === 'SABRE' ? 'default' : script.gdsSystem === 'AMADEUS' ? 'secondary' : 'outline'}
+                        className="text-xs"
+                      >
+                        {script.gdsSystem}
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground line-clamp-1">
                     {script.content.substring(0, 80)}...
                   </p>
                   {script.tags && script.tags.length > 0 && (
-                    <div className="flex gap-1 mt-2">
+                    <div className="flex gap-1 mt-2 flex-wrap">
                       {script.tags.map((tag) => (
                         <Badge key={tag} variant="secondary" className="text-xs">
                           {tag}
