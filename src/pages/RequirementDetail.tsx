@@ -1,19 +1,72 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useRequirements } from '@/contexts/RequirementContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import RequirementStatusBadge from '@/components/RequirementStatusBadge';
 import RequirementPriorityBadge from '@/components/RequirementPriorityBadge';
+import SupervisorActionPanel from '@/components/SupervisorActionPanel';
 import { ArrowLeft, Mail, Phone, User, Calendar, Clock, Server, Building2, Home, AlertTriangle } from 'lucide-react';
+import { toast } from 'sonner';
 
 const RequirementDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getRequirement } = useRequirements();
+  const { user } = useAuth();
+  const { getRequirement, updateRequirement } = useRequirements();
 
   const requirement = id ? getRequirement(id) : undefined;
+  
+  const handleSupervisorAction = (
+    action: 'autorizar_analista' | 'resolver_directo',
+    respuesta: string,
+    informacionBrindada?: string
+  ) => {
+    if (!requirement || !user) return;
+
+    const updates: any = {
+      respuestaSupervisor: respuesta,
+      accionSupervisor: action,
+      updatedAt: new Date(),
+      history: [
+        ...requirement.history,
+        {
+          id: Date.now().toString(),
+          date: new Date(),
+          action: action === 'autorizar_analista' 
+            ? 'Supervisor autorizó al analista para resolver' 
+            : 'Supervisor resolvió el caso directamente',
+          user: user.name,
+          comment: respuesta,
+        },
+      ],
+    };
+
+    if (action === 'autorizar_analista') {
+      updates.status = 'en-proceso';
+      updates.assignedTo = requirement.nombreAsesor;
+    } else {
+      updates.status = 'resuelto';
+      updates.informacionBrindada = informacionBrindada || '';
+      updates.supervisorResolvio = true;
+      updates.resolvedAt = new Date();
+      updates.assignedTo = user.name;
+    }
+
+    updateRequirement(requirement.id, updates);
+    
+    toast.success(
+      action === 'autorizar_analista'
+        ? 'Caso autorizado. El analista puede proceder.'
+        : 'Caso resuelto exitosamente'
+    );
+    
+    if (action === 'resolver_directo') {
+      setTimeout(() => navigate('/supervisor/inbox'), 2000);
+    }
+  };
 
   if (!requirement) {
     return (
@@ -53,9 +106,11 @@ const RequirementDetail = () => {
             Volver a Requerimientos
           </Button>
         </div>
-        <Link to={`/requirements/${requirement.id}/edit`}>
-          <Button>Editar Requerimiento</Button>
-        </Link>
+        {user && ['ADMINISTRADOR', 'ANALISTA', 'SUPERVISOR'].includes(user.role) && (
+          <Link to={`/requirements/${requirement.id}/edit`}>
+            <Button>Editar Requerimiento</Button>
+          </Link>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -171,6 +226,15 @@ const RequirementDetail = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Panel de Acción del Supervisor */}
+          {user && ['SUPERVISOR', 'ADMINISTRADOR'].includes(user.role) && 
+           requirement.status === 'pendiente-supervisor' && (
+            <SupervisorActionPanel
+              requirement={requirement}
+              onAction={handleSupervisorAction}
+            />
+          )}
 
           <Card>
             <CardHeader>

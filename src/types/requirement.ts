@@ -72,6 +72,9 @@ export type UserRole = 'ANALISTA' | 'SUPERVISOR' | 'ADMINISTRADOR';
 // Opciones de Escalamiento
 export type EscalationOption = 'SUPERVISOR' | 'OTRA_AREA';
 
+// Acciones del Supervisor
+export type SupervisorAction = 'autorizar_analista' | 'resolver_directo' | null;
+
 export interface Requirement {
   id: string;
   ticketNumber: string; // Número de ticket/caso autogenerado
@@ -92,6 +95,11 @@ export interface Requirement {
   puedeEntregarInformacion: boolean; // Si/No - Nueva pregunta
   escaladoA?: EscalationOption; // SUPERVISOR | OTRA_AREA
   nombreAreaEscalamiento?: string; // Nombre del área si es OTRA_AREA
+  
+  // Gestión del Supervisor (para casos escalados)
+  respuestaSupervisor?: string; // Respuesta/instrucciones del supervisor al analista
+  accionSupervisor?: SupervisorAction; // Qué decidió hacer el supervisor
+  supervisorResolvio?: boolean; // Si el supervisor resolvió directamente el caso
   
   informacionBrindada: string; // Texto largo
   observaciones: string; // Texto largo
