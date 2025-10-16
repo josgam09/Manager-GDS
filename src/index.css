@@ -119,5 +119,62 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Encode Sans', system-ui, sans-serif;
+    font-weight: 400; /* Regular para texto general */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Tipografía para títulos y elementos destacados */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600; /* Semibold para títulos */
+  }
+
+  h1 {
+    font-weight: 700; /* Bold para títulos principales */
+  }
+
+  /* Clases de peso de fuente personalizadas */
+  .font-light {
+    font-weight: 300;
+  }
+
+  .font-regular {
+    font-weight: 400;
+  }
+
+  .font-medium {
+    font-weight: 500;
+  }
+
+  .font-semibold {
+    font-weight: 600;
+  }
+
+  .font-bold {
+    font-weight: 700;
+  }
+
+  .font-black {
+    font-weight: 900;
+  }
+
+  /* Optimización de fuentes para mejor legibilidad */
+  strong, b {
+    font-weight: 600; /* Semibold para énfasis */
+  }
+
+  .text-lg, .text-xl, .text-2xl, .text-3xl, .text-4xl {
+    font-weight: 600; /* Semibold para textos grandes */
+  }
+
+  /* Botones y badges */
+  button {
+    font-weight: 500; /* Medium para botones */
+  }
+
+  /* Labels y pequeños textos */
+  label {
+    font-weight: 500; /* Medium para labels */
   }
 }
