@@ -28,6 +28,7 @@ const RequirementFormSimple = () => {
   const [puedeEntregarInformacion, setPuedeEntregarInformacion] = useState('Si');
   const [escaladoA, setEscaladoA] = useState('');
   const [nombreAreaEscalamiento, setNombreAreaEscalamiento] = useState('');
+  const [analisisAnalista, setAnalisisAnalista] = useState('');
   const [informacionBrindada, setInformacionBrindada] = useState('');
   const [observaciones, setObservaciones] = useState('');
   const [availableScripts, setAvailableScripts] = useState<ResponseScript[]>([]);
@@ -66,6 +67,10 @@ const RequirementFormSimple = () => {
         toast.error('Por favor selecciona a quién escalar el caso');
         return;
       }
+      if (escaladoA === 'SUPERVISOR' && !analisisAnalista.trim()) {
+        toast.error('Por favor proporciona tu análisis y motivo del escalamiento al supervisor');
+        return;
+      }
       if (escaladoA === 'OTRA_AREA' && !nombreAreaEscalamiento) {
         toast.error('Por favor indica el nombre del área a escalar');
         return;
@@ -96,6 +101,7 @@ const RequirementFormSimple = () => {
       puedeEntregarInformacion: puedeEntregarInformacion === 'Si',
       escaladoA: escaladoA as any,
       nombreAreaEscalamiento: nombreAreaEscalamiento || undefined,
+      analisisAnalista: analisisAnalista || undefined,
       informacionBrindada,
       observaciones,
       initialDate: new Date(),
@@ -333,6 +339,30 @@ const RequirementFormSimple = () => {
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Campo de Análisis del Analista - Solo si escaladoA es SUPERVISOR */}
+                    {escaladoA === 'SUPERVISOR' && (
+                      <div className="space-y-2 p-4 border-2 border-blue-200 rounded-lg bg-blue-50/50 dark:bg-blue-950/20">
+                        <Label className="text-base font-semibold flex items-center gap-2">
+                          📝 Análisis y Motivo del Escalamiento *
+                        </Label>
+                        <Textarea
+                          value={analisisAnalista}
+                          onChange={(e) => setAnalisisAnalista(e.target.value)}
+                          placeholder="Proporciona un análisis detallado del caso y explica por qué necesitas escalar al supervisor:&#10;&#10;• Resumen de la solicitud del cliente&#10;• Qué has verificado hasta el momento&#10;• Por qué no puedes resolver (falta autorización, excede tu nivel, política especial, etc.)&#10;• Qué decisión o información necesitas del supervisor&#10;&#10;Ejemplo: 'Cliente solicita waiver por emergencia médica. He verificado el certificado médico adjunto que es válido. Requiero autorización de supervisor para procesar waiver especial ya que excede el límite de 7 días establecido en la política.'"
+                          rows={8}
+                          className="resize-none text-sm"
+                          required
+                        />
+                        <div className="flex items-start gap-2 p-3 bg-blue-100 dark:bg-blue-900/30 rounded-md text-xs">
+                          <div className="mt-0.5">💡</div>
+                          <div className="flex-1">
+                            <p className="font-semibold mb-1">Sé específico y claro:</p>
+                            <p>El supervisor usará esta información para evaluar y tomar una decisión. Incluye todos los detalles relevantes que ayuden a resolver el caso rápidamente.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Campo para nombre del área - Solo si escaladoA es OTRA_AREA */}
                     {escaladoA === 'OTRA_AREA' && (

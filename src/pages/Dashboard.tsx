@@ -16,6 +16,7 @@ const Dashboard = () => {
     nuevo: requirements.filter(r => r.status === 'nuevo').length,
     enProceso: requirements.filter(r => r.status === 'en-proceso').length,
     pendienteSupervisor: requirements.filter(r => r.status === 'pendiente-supervisor').length,
+    respuestaSupervisor: requirements.filter(r => r.status === 'respuesta-supervisor').length,
     pendienteOtraArea: requirements.filter(r => r.status === 'pendiente-otra-area').length,
     resuelto: requirements.filter(r => r.status === 'resuelto').length,
     critica: requirements.filter(r => r.priority === 'critica').length,
@@ -115,6 +116,13 @@ const Dashboard = () => {
                   <span className="text-sm">Pendiente Supervisor</span>
                 </div>
                 <span className="font-semibold">{stats.pendienteSupervisor}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="text-sm">Respuesta Supervisor</span>
+                </div>
+                <span className="font-semibold">{stats.respuestaSupervisor}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

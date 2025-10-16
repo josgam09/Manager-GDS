@@ -3,6 +3,7 @@ export type RequirementStatus =
   | 'en-proceso' 
   | 'pendiente-informacion' 
   | 'pendiente-supervisor' 
+  | 'respuesta-supervisor'
   | 'pendiente-otra-area' 
   | 'resuelto' 
   | 'cerrado';
@@ -95,6 +96,9 @@ export interface Requirement {
   puedeEntregarInformacion: boolean; // Si/No - Nueva pregunta
   escaladoA?: EscalationOption; // SUPERVISOR | OTRA_AREA
   nombreAreaEscalamiento?: string; // Nombre del área si es OTRA_AREA
+  
+  // Análisis del Analista (obligatorio cuando escala a supervisor)
+  analisisAnalista?: string; // Resumen y motivo del escalamiento al supervisor
   
   // Gestión del Supervisor (para casos escalados)
   respuestaSupervisor?: string; // Respuesta/instrucciones del supervisor al analista

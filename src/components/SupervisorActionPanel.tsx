@@ -186,15 +186,15 @@ const SupervisorActionPanel = ({ requirement, onAction }: SupervisorActionPanelP
           <p className="font-medium mb-1">ℹ️ Información:</p>
           {accion === 'autorizar_analista' ? (
             <>
-              <p>• El caso volverá al analista con estado "EN PROCESO"</p>
-              <p>• El analista podrá ver tus instrucciones y proceder</p>
-              <p>• El analista será responsable del cierre final</p>
+              <p>• El caso cambiará a estado "RESPUESTA SUPERVISOR" 🔵</p>
+              <p>• El analista recibirá tus instrucciones/autorización</p>
+              <p>• El analista podrá proceder y cerrar el caso</p>
             </>
           ) : (
             <>
-              <p>• El caso se marcará como "RESUELTO"</p>
+              <p>• El caso se marcará como "CERRADO" ⚫</p>
               <p>• Tú serás registrado como quien resolvió el caso</p>
-              <p>• El caso quedará cerrado automáticamente</p>
+              <p>• El caso quedará cerrado definitivamente</p>
             </>
           )}
         </div>

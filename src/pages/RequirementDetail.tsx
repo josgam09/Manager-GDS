@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import RequirementStatusBadge from '@/components/RequirementStatusBadge';
 import RequirementPriorityBadge from '@/components/RequirementPriorityBadge';
 import SupervisorActionPanel from '@/components/SupervisorActionPanel';
-import { ArrowLeft, Mail, Phone, User, Calendar, Clock, Server, Building2, Home, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, User, Calendar, Clock, Server, Building2, Home, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const RequirementDetail = () => {
@@ -45,10 +45,10 @@ const RequirementDetail = () => {
     };
 
     if (action === 'autorizar_analista') {
-      updates.status = 'en-proceso';
+      updates.status = 'respuesta-supervisor';
       updates.assignedTo = requirement.nombreAsesor;
     } else {
-      updates.status = 'resuelto';
+      updates.status = 'cerrado';
       updates.informacionBrindada = informacionBrindada || '';
       updates.supervisorResolvio = true;
       updates.resolvedAt = new Date();
@@ -198,6 +198,41 @@ const RequirementDetail = () => {
                 </>
               )}
 
+              {/* Respuesta del Supervisor (si existe) */}
+              {requirement.respuestaSupervisor && (
+                <>
+                  <Separator />
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border-2 border-blue-500/50">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                      <CheckCircle2 className="h-5 w-5" />
+                      Respuesta del Supervisor
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-white dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+                        <p className="text-sm font-semibold mb-2">
+                          {requirement.accionSupervisor === 'autorizar_analista' 
+                            ? '✅ Autorización e Instrucciones:' 
+                            : '✅ Resolución del Supervisor:'}
+                        </p>
+                        <p className="whitespace-pre-wrap text-sm">{requirement.respuestaSupervisor}</p>
+                      </div>
+                      
+                      <Badge variant="outline" className="bg-blue-100 dark:bg-blue-900/30">
+                        {requirement.accionSupervisor === 'autorizar_analista' 
+                          ? '👨‍💼 Autorizado para proceder' 
+                          : '✅ Resuelto por Supervisor'}
+                      </Badge>
+                      
+                      {requirement.accionSupervisor === 'autorizar_analista' && (
+                        <p className="text-xs text-muted-foreground italic">
+                          💡 Puedes proceder siguiendo las instrucciones del supervisor y cerrar el caso cuando termines.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
               {/* Información de Escalamiento */}
               {!requirement.puedeEntregarInformacion && (
                 <>
@@ -207,7 +242,7 @@ const RequirementDetail = () => {
                       <AlertTriangle className="h-5 w-5 text-warning" />
                       Caso Escalado
                     </h3>
-                    <div className="space-y-2 text-sm">
+                    <div className="space-y-3 text-sm">
                       <p>
                         <strong>Motivo:</strong> El analista no pudo entregar la información requerida
                       </p>
@@ -217,6 +252,20 @@ const RequirementDetail = () => {
                           {requirement.escaladoA === 'SUPERVISOR' ? 'SUPERVISOR' : `OTRA ÁREA: ${requirement.nombreAreaEscalamiento}`}
                         </Badge>
                       </p>
+                      
+                      {/* Análisis del Analista (si escala a supervisor) */}
+                      {requirement.escaladoA === 'SUPERVISOR' && requirement.analisisAnalista && (
+                        <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                          <p className="font-semibold mb-2 flex items-center gap-2">
+                            📝 Análisis del Analista:
+                          </p>
+                          <p className="whitespace-pre-wrap text-foreground">{requirement.analisisAnalista}</p>
+                          <p className="text-xs text-muted-foreground mt-2 italic">
+                            Analista: {requirement.nombreAsesor}
+                          </p>
+                        </div>
+                      )}
+                      
                       <p className="text-muted-foreground italic">
                         Este caso requiere atención de {requirement.escaladoA === 'SUPERVISOR' ? 'un supervisor' : `el área de ${requirement.nombreAreaEscalamiento}`}
                       </p>
