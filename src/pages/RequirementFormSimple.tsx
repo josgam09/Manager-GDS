@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRequirements } from '@/contexts/RequirementContext';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import ScriptSelector from '@/components/ScriptSelector';
+import { getApplicableScripts, ResponseScript } from '@/data/responseScripts';
 
 const RequirementFormSimple = () => {
   const navigate = useNavigate();
@@ -25,6 +27,27 @@ const RequirementFormSimple = () => {
   const [solicitudCliente, setSolicitudCliente] = useState('');
   const [informacionBrindada, setInformacionBrindada] = useState('');
   const [observaciones, setObservaciones] = useState('');
+  const [availableScripts, setAvailableScripts] = useState<ResponseScript[]>([]);
+
+  // Actualizar scripts disponibles cuando cambian tipo de solicitud o reclamo
+  useEffect(() => {
+    let scripts: ResponseScript[] = [];
+    
+    if (tipoSolicitud) {
+      scripts = [...scripts, ...getApplicableScripts('tipoSolicitud', tipoSolicitud)];
+    }
+    
+    if (reclamoIncidente) {
+      scripts = [...scripts, ...getApplicableScripts('reclamoIncidente', reclamoIncidente)];
+    }
+    
+    setAvailableScripts(scripts);
+  }, [tipoSolicitud, reclamoIncidente]);
+
+  const handleApplyScript = (scriptContent: string) => {
+    setInformacionBrindada(scriptContent);
+    toast.success('Script aplicado. Revisa y ajusta según necesites.');
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,12 +263,27 @@ const RequirementFormSimple = () => {
 
               <div className="space-y-2">
                 <Label>Información Brindada</Label>
+                
+                {/* Selector de Scripts */}
+                {availableScripts.length > 0 && (
+                  <div className="mb-4">
+                    <ScriptSelector
+                      scripts={availableScripts}
+                      onSelectScript={handleApplyScript}
+                      disabled={!tipoSolicitud && !reclamoIncidente}
+                    />
+                  </div>
+                )}
+                
                 <Textarea
                   value={informacionBrindada}
                   onChange={(e) => setInformacionBrindada(e.target.value)}
-                  placeholder="Información o respuesta brindada..."
-                  rows={3}
+                  placeholder="Información o respuesta brindada... Usa los scripts sugeridos arriba o escribe tu propia respuesta."
+                  rows={8}
                 />
+                <p className="text-xs text-muted-foreground">
+                  💡 Puedes usar los scripts sugeridos arriba según el tipo de solicitud o reclamo seleccionado
+                </p>
               </div>
 
               <div className="space-y-2">
