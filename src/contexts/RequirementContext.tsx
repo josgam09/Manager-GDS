@@ -59,7 +59,7 @@ const mockRequirements: Requirement[] = [
     ticketNumber: 'GDS-2025-002',
     nombreAsesor: 'Sofia Guarin',
     canalConsulta: 'SISTEMA DE DISTRIBUCIÓN GDS',
-    origenConsulta: 'GDS',
+    origenConsulta: 'SABRE',
     esSoporteIngles: true,
     horaIngresoCorreo: '14:15',
     pnrTktLocalizador: 'XYZ789',

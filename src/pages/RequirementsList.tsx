@@ -167,9 +167,9 @@ const RequirementsList = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los orígenes</SelectItem>
-                <SelectItem value="GDS">GDS</SelectItem>
                 <SelectItem value="AMADEUS">AMADEUS</SelectItem>
                 <SelectItem value="NO CORRESPONDE">NO CORRESPONDE</SelectItem>
+                <SelectItem value="SABRE">SABRE</SelectItem>
               </SelectContent>
             </Select>
           </div>

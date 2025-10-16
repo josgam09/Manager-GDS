@@ -21,7 +21,7 @@ export type AsesorName =
 export type CanalConsulta = 'SISTEMA DE DISTRIBUCIÓN GDS';
 
 // Origen Consulta
-export type OrigenConsulta = 'GDS' | 'AMADEUS' | 'NO CORRESPONDE';
+export type OrigenConsulta = 'AMADEUS' | 'NO CORRESPONDE' | 'SABRE';
 
 // Tipo de Solicitud
 export type TipoSolicitud = 

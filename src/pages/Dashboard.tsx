@@ -21,9 +21,9 @@ const Dashboard = () => {
 
   // Estadísticas por origen de consulta
   const origenStats = {
-    gds: requirements.filter(r => r.origenConsulta === 'GDS').length,
     amadeus: requirements.filter(r => r.origenConsulta === 'AMADEUS').length,
     noCorresponde: requirements.filter(r => r.origenConsulta === 'NO CORRESPONDE').length,
+    sabre: requirements.filter(r => r.origenConsulta === 'SABRE').length,
   };
 
   // Estadísticas por soporte inglés
@@ -138,13 +138,6 @@ const Dashboard = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                  <span className="text-sm">GDS</span>
-                </div>
-                <span className="font-semibold">{origenStats.gds}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-purple-500"></div>
                   <span className="text-sm">AMADEUS</span>
                 </div>
@@ -156,6 +149,13 @@ const Dashboard = () => {
                   <span className="text-sm">No Corresponde</span>
                 </div>
                 <span className="font-semibold">{origenStats.noCorresponde}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="text-sm">SABRE</span>
+                </div>
+                <span className="font-semibold">{origenStats.sabre}</span>
               </div>
               <div className="flex items-center justify-between pt-2 border-t">
                 <div className="flex items-center gap-2">

@@ -17,7 +17,7 @@ const RequirementFormSimple = () => {
   const { addRequirement } = useRequirements();
 
   const [nombreAsesor, setNombreAsesor] = useState('');
-  const [origenConsulta, setOrigenConsulta] = useState('GDS');
+  const [origenConsulta, setOrigenConsulta] = useState('SABRE');
   const [esSoporteIngles, setEsSoporteIngles] = useState('No');
   const [horaIngresoCorreo, setHoraIngresoCorreo] = useState('');
   const [pnrTktLocalizador, setPnrTktLocalizador] = useState('');
@@ -147,9 +147,9 @@ const RequirementFormSimple = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="GDS">GDS</SelectItem>
                       <SelectItem value="AMADEUS">AMADEUS</SelectItem>
                       <SelectItem value="NO CORRESPONDE">NO CORRESPONDE</SelectItem>
+                      <SelectItem value="SABRE">SABRE</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -207,17 +207,17 @@ const RequirementFormSimple = () => {
                       <SelectValue placeholder="Seleccionar..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Waiver GDS - Sabre">Waiver GDS - Sabre</SelectItem>
-                      <SelectItem value="Waiver Comercial">Waiver Comercial</SelectItem>
-                      <SelectItem value="Remisión Voluntaria - Involuntaria">Remisión Voluntaria - Involuntaria</SelectItem>
-                      <SelectItem value="Cesión - Cambio de Nombre Vol - Corrección">Cesión - Cambio de Nombre Vol - Corrección</SelectItem>
-                      <SelectItem value="Certificado Médico">Certificado Médico</SelectItem>
                       <SelectItem value="Cambio de Status (Ticket)">Cambio de Status (Ticket)</SelectItem>
-                      <SelectItem value="Opcionales - BUNDLES">Opcionales - BUNDLES</SelectItem>
-                      <SelectItem value="Retracto (CL/BR/CO)">Retracto (CL/BR/CO)</SelectItem>
-                      <SelectItem value="Política Comercial - Regulación de Emisión">Política Comercial - Regulación de Emisión</SelectItem>
+                      <SelectItem value="Certificado Médico">Certificado Médico</SelectItem>
+                      <SelectItem value="Cesión - Cambio de Nombre Vol - Corrección">Cesión - Cambio de Nombre Vol - Corrección</SelectItem>
                       <SelectItem value="Facturación">Facturación</SelectItem>
+                      <SelectItem value="Opcionales - BUNDLES">Opcionales - BUNDLES</SelectItem>
+                      <SelectItem value="Política Comercial - Regulación de Emisión">Política Comercial - Regulación de Emisión</SelectItem>
+                      <SelectItem value="Remisión Voluntaria - Involuntaria">Remisión Voluntaria - Involuntaria</SelectItem>
+                      <SelectItem value="Retracto (CL/BR/CO)">Retracto (CL/BR/CO)</SelectItem>
                       <SelectItem value="Toma de Pagos (WebPay/Portal AG/Otro)">Toma de Pagos (WebPay/Portal AG/Otro)</SelectItem>
+                      <SelectItem value="Waiver Comercial">Waiver Comercial</SelectItem>
+                      <SelectItem value="Waiver GDS - Sabre">Waiver GDS - Sabre</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -229,17 +229,17 @@ const RequirementFormSimple = () => {
                       <SelectValue placeholder="Seleccionar..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Error en Emisión (Amadeus - Navitaire -Sabre)">Error en Emisión</SelectItem>
-                      <SelectItem value="Alternativa por Cancelación - Demora - Sobreventa">Alternativa por Cancelación</SelectItem>
-                      <SelectItem value="Proceso o Estado de Devolución (PW/APP/BSP/ARC)">Proceso de Devolución</SelectItem>
-                      <SelectItem value="Segmentos Pasivos - Error BUNDLE">Segmentos Pasivos</SelectItem>
-                      <SelectItem value="Cobro Erróneo ATO - No corresponde">Cobro Erróneo ATO</SelectItem>
+                      <SelectItem value="ACM (Dev BSP/ARC/Pago Exceso)">ACM (Dev BSP/ARC/Pago Exceso)</SelectItem>
+                      <SelectItem value="Alternativa por Cancelación - Demora - Sobreventa">Alternativa por Cancelación - Demora - Sobreventa</SelectItem>
                       <SelectItem value="Check-in">Check-in</SelectItem>
-                      <SelectItem value="Escalamiento Finanzas - Facturación -ATO">Escalamiento Finanzas</SelectItem>
-                      <SelectItem value="Ingreso APP - Error en ATO -Otro">Ingreso APP</SelectItem>
-                      <SelectItem value="ACM (Dev BSP/ARC/Pago Exceso)">ACM</SelectItem>
+                      <SelectItem value="Cobro Erróneo ATO - No corresponde">Cobro Erróneo ATO - No corresponde</SelectItem>
+                      <SelectItem value="Error en Emisión (Amadeus - Navitaire -Sabre)">Error en Emisión (Amadeus - Navitaire -Sabre)</SelectItem>
+                      <SelectItem value="Escalamiento Finanzas - Facturación -ATO">Escalamiento Finanzas - Facturación -ATO</SelectItem>
+                      <SelectItem value="Ingreso APP - Error en ATO -Otro">Ingreso APP - Error en ATO -Otro</SelectItem>
                       <SelectItem value="Otro">Otro</SelectItem>
                       <SelectItem value="PNR HX">PNR HX</SelectItem>
+                      <SelectItem value="Proceso o Estado de Devolución (PW/APP/BSP/ARC)">Proceso o Estado de Devolución (PW/APP/BSP/ARC)</SelectItem>
+                      <SelectItem value="Segmentos Pasivos - Error BUNDLE">Segmentos Pasivos - Error BUNDLE</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
