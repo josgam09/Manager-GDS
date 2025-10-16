@@ -13,6 +13,12 @@ import Dashboard from "@/pages/Dashboard";
 import RequirementsList from "@/pages/RequirementsList";
 import RequirementDetail from "@/pages/RequirementDetail";
 import RequirementForm from "@/pages/RequirementFormSimple";
+import SupervisorInbox from "@/pages/SupervisorInbox";
+import AdminPanel from "@/pages/admin/AdminPanel";
+import UserManagement from "@/pages/admin/UserManagement";
+import FieldManagement from "@/pages/admin/FieldManagement";
+import ListManagement from "@/pages/admin/ListManagement";
+import DashboardManagement from "@/pages/admin/DashboardManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +62,59 @@ const App = () => (
                             </ProtectedRoute>
                           } 
                         />
+                        
+                        {/* Bandeja de Supervisor */}
+                        <Route 
+                          path="/supervisor/inbox" 
+                          element={
+                            <ProtectedRoute allowedRoles={['ADMINISTRADOR', 'SUPERVISOR']}>
+                              <SupervisorInbox />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        
+                        {/* Panel de Administración */}
+                        <Route 
+                          path="/admin" 
+                          element={
+                            <ProtectedRoute allowedRoles={['ADMINISTRADOR']}>
+                              <AdminPanel />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        <Route 
+                          path="/admin/users" 
+                          element={
+                            <ProtectedRoute allowedRoles={['ADMINISTRADOR']}>
+                              <UserManagement />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        <Route 
+                          path="/admin/fields" 
+                          element={
+                            <ProtectedRoute allowedRoles={['ADMINISTRADOR']}>
+                              <FieldManagement />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        <Route 
+                          path="/admin/lists" 
+                          element={
+                            <ProtectedRoute allowedRoles={['ADMINISTRADOR']}>
+                              <ListManagement />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        <Route 
+                          path="/admin/dashboards" 
+                          element={
+                            <ProtectedRoute allowedRoles={['ADMINISTRADOR']}>
+                              <DashboardManagement />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </Layout>
