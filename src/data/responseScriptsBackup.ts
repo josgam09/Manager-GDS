@@ -1,7 +1,6 @@
 // Scripts de respuesta para Información Brindada
 // Sistema de Distribución AMADEUS y SABRE
-// Basado en análisis de 8000+ casos reales
-// Versión 3.0 - Combinación de mejores prácticas + casos reales
+// Actualizado con mejores prácticas y múltiples opciones por categoría
 
 export interface ResponseScript {
   id: string;
@@ -10,9 +9,7 @@ export interface ResponseScript {
   category: 'tipoSolicitud' | 'reclamoIncidente';
   applicableFor: string[]; // IDs de tipos o reclamos aplicables
   gdsSystem?: 'AMADEUS' | 'SABRE' | 'AMBOS'; // Sistema GDS específico
-  scenario?: 'aprobado' | 'rechazado' | 'proceso' | 'consulta' | 'general';
   tags?: string[];
-  examples?: string[]; // IDs de casos reales de referencia
 }
 
 // ========================================
@@ -20,27 +17,7 @@ export interface ResponseScript {
 // ========================================
 
 export const tipoSolicitudScripts: ResponseScript[] = [
-  // ===== WAIVER GDS - SABRE ===== (547 casos reales analizados)
-  {
-    id: 'waiver-devolucion-eliminar-segmentos-1',
-    title: 'Waiver para Devolución - Eliminar Segmentos Primero',
-    content: `Estimado/a [NOMBRE AGENCIA],
-
-Para poder entregar waiver por devolución, es necesario que elimines los tramos de la reserva que no se van a utilizar.
-
-Una vez eliminados los segmentos, por favor confírma y procederemos a enviar el código de waiver correspondiente.
-
-Quedamos atentos.
-
-Saludos,
-[NOMBRE ASESOR]`,
-    category: 'tipoSolicitud',
-    applicableFor: ['Waiver GDS - Sabre'],
-    gdsSystem: 'AMBOS',
-    scenario: 'proceso',
-    tags: ['waiver', 'devolucion', 'segmentos', 'eliminar'],
-    examples: ['Caso real más común en CSV']
-  },
+  // ===== WAIVER GDS - SABRE =====
   {
     id: 'waiver-sabre-aprobado-1',
     title: 'Waiver SABRE Aprobado - Cambio de Fecha',
@@ -228,76 +205,7 @@ Saludos cordiales,
     tags: ['remision', 'involuntaria', 'cancelacion']
   },
 
-  // ===== CESIÓN - CAMBIO DE NOMBRE ===== (Casos muy frecuentes)
-  {
-    id: 'cambio-nombre-typo-real-1',
-    title: '[REAL] Corrección Tipográfica - Sin Costo + Control Perdido',
-    content: `Estimado/a [NOMBRE AGENCIA],
-
-Te informo que he realizado la corrección en el nombre del pasajero. El cambio no genera cargos, ya que corresponde a un error tipográfico.
-
-✅ CAMBIO REALIZADO:
-• Pasajero: [NOMBRE COMPLETO]
-• Corrección aplicada
-• PNR: [PNR]
-
-⚠️ IMPORTANTE - CONTROL DE RESERVA:
-Al realizar este cambio **pierdes el control de esta reserva**, es por esto que el itinerario con el cambio realizado fue enviado al correo [EMAIL AGENCIA].
-
-Saludos,
-[NOMBRE ASESOR]`,
-    category: 'tipoSolicitud',
-    applicableFor: ['Cesión - Cambio de Nombre Vol - Corrección'],
-    gdsSystem: 'AMBOS',
-    scenario: 'aprobado',
-    tags: ['typo', 'sin-costo', 'control-perdido', 'real'],
-    examples: ['ID:55692', 'ID:55957', 'ID:55958']
-  },
-  {
-    id: 'cambio-nombre-confirmacion-previa-1',
-    title: '[REAL] Solicitud de Confirmación - Antes de Cambio de Fecha',
-    content: `Estimado/a [NOMBRE AGENCIA],
-
-Te informo que el cambio lo podemos generar sin costo, puesto que se trata de una corrección.
-
-⚠️ IMPORTANTE - LEER ANTES DE CONFIRMAR:
-Sin embargo, si el pasajero desea además hacer cambios de fecha sobre el itinerario, deberás realizarlo **ANTES** de solicitar cambio de nombre, dado que, al realizar esta modificación, la agencia pierde el control de la reserva.
-
-Quedo atento a tu confirmación para proceder.
-
-Saludos,
-[NOMBRE ASESOR]`,
-    category: 'tipoSolicitud',
-    applicableFor: ['Cesión - Cambio de Nombre Vol - Corrección'],
-    gdsSystem: 'AMBOS',
-    scenario: 'proceso',
-    tags: ['confirmacion', 'cambio-fecha', 'advertencia', 'real'],
-    examples: ['ID:55647', 'ID:55658']
-  },
-  {
-    id: 'cambio-nombre-con-costo-pago-web-1',
-    title: '[REAL] Cambio de Nombre con Costo - Pago en Web',
-    content: `Estimado/a [NOMBRE AGENCIA], buenas tardes.
-
-El cambio de nombre lo podemos gestionar y tiene un valor de **$[MONTO] [MONEDA]** por tramo, y por pasajero.
-
-💳 FORMA DE PAGO:
-El pago debes realizarlo ingresando en www.jetsmart.com, en la opción: "Administra tu viaje" y opción "Transacciones".
-
-⚠️ IMPORTANTE:
-Sin embargo, si el pasajero desea además hacer cambios de fecha sobre el itinerario, deberán realizarlo ANTES de solicitar cambio de nombre, dado que, al realizar esta modificación, la agencia pierde el control de la reserva.
-
-Quedo atento a la confirmación para avanzar con el cambio desde nuestra pantalla.
-
-Saludos,
-[NOMBRE ASESOR]`,
-    category: 'tipoSolicitud',
-    applicableFor: ['Cesión - Cambio de Nombre Vol - Corrección'],
-    gdsSystem: 'AMBOS',
-    scenario: 'general',
-    tags: ['cambio-nombre', 'costo', 'pago-web', 'real'],
-    examples: ['ID:55670', 'ID:55942', 'ID:55946']
-  },
+  // ===== CESIÓN - CAMBIO DE NOMBRE =====
   {
     id: 'cambio-nombre-1',
     title: 'Corrección de Nombre - Typo Menor',
