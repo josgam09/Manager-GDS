@@ -1,8 +1,12 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { LayoutDashboard, List, PlusCircle, Menu, Server } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { LayoutDashboard, List, PlusCircle, Menu, Server, Settings, LogOut, Shield, Users as UsersIcon, UserCheck, Inbox } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,13 +14,57 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const { user, logout, hasRole } = useAuth();
 
-  const navigation = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { name: 'Requerimientos', href: '/requirements', icon: List },
-    { name: 'Nuevo Requerimiento', href: '/requirements/new', icon: PlusCircle },
+  const handleLogout = () => {
+    logout();
+    toast.success('Sesión cerrada correctamente');
+    navigate('/login');
+  };
+
+  // Navegación base para todos
+  const baseNavigation = [
+    { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['ADMINISTRADOR', 'SUPERVISOR', 'ANALISTA'] },
+    { name: 'Requerimientos', href: '/requirements', icon: List, roles: ['ADMINISTRADOR', 'SUPERVISOR', 'ANALISTA'] },
   ];
+
+  // Navegación según rol
+  const roleNavigation = [
+    // Analista puede crear nuevos requerimientos
+    { name: 'Nuevo Requerimiento', href: '/requirements/new', icon: PlusCircle, roles: ['ADMINISTRADOR', 'ANALISTA'] },
+    // Supervisor tiene bandeja especial
+    { name: 'Bandeja Supervisor', href: '/supervisor/inbox', icon: Inbox, roles: ['ADMINISTRADOR', 'SUPERVISOR'] },
+    // Administrador tiene panel de administración
+    { name: 'Panel Admin', href: '/admin', icon: Settings, roles: ['ADMINISTRADOR'] },
+  ];
+
+  // Filtrar navegación según rol del usuario
+  const navigation = [...baseNavigation, ...roleNavigation].filter(item =>
+    !user || item.roles.includes(user.role)
+  );
+
+  // Obtener iniciales del usuario
+  const getUserInitials = (name?: string) => {
+    if (!name) return '??';
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  // Color del badge según rol
+  const getRoleBadgeColor = (role?: string) => {
+    switch (role) {
+      case 'ADMINISTRADOR': return 'bg-red-500/10 text-red-600';
+      case 'SUPERVISOR': return 'bg-blue-500/10 text-blue-600';
+      case 'ANALISTA': return 'bg-green-500/10 text-green-600';
+      default: return 'bg-muted';
+    }
+  };
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -63,6 +111,35 @@ const Layout = ({ children }: LayoutProps) => {
               </li>
             </ul>
           </nav>
+          
+          {/* User Info Section */}
+          {user && (
+            <div className="mt-auto border-t border-sidebar-border pt-4">
+              <div className="flex items-center gap-3 px-2">
+                <Avatar>
+                  <AvatarFallback className={getRoleBadgeColor(user.role)}>
+                    {getUserInitials(user.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-sidebar-foreground truncate">
+                    {user.name}
+                  </p>
+                  <Badge variant="outline" className={`text-xs ${getRoleBadgeColor(user.role)}`}>
+                    {user.role}
+                  </Badge>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2 mt-3 text-sidebar-foreground hover:bg-sidebar-accent"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4" />
+                Cerrar Sesión
+              </Button>
+            </div>
+          )}
         </div>
       </aside>
 
@@ -111,6 +188,38 @@ const Layout = ({ children }: LayoutProps) => {
                     </li>
                   </ul>
                 </nav>
+                
+                {/* User Info Mobile */}
+                {user && (
+                  <div className="mt-auto border-t border-sidebar-border pt-4">
+                    <div className="flex items-center gap-3 px-2">
+                      <Avatar>
+                        <AvatarFallback className={getRoleBadgeColor(user.role)}>
+                          {getUserInitials(user.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-sidebar-foreground truncate">
+                          {user.name}
+                        </p>
+                        <Badge variant="outline" className={`text-xs ${getRoleBadgeColor(user.role)}`}>
+                          {user.role}
+                        </Badge>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start gap-2 mt-3 text-sidebar-foreground hover:bg-sidebar-accent"
+                      onClick={() => {
+                        setOpen(false);
+                        handleLogout();
+                      }}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Cerrar Sesión
+                    </Button>
+                  </div>
+                )}
               </div>
             </SheetContent>
           </Sheet>
