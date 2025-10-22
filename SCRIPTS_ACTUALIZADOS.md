@@ -339,3 +339,4 @@ Has implementado un **Sistema Inteligente de Scripts** que:
 Para agregar los scripts reales del archivo Excel, solo necesito que lo exportes a CSV o me compartas el contenido.
 
 
+

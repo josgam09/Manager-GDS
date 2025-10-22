@@ -393,3 +393,8 @@ Cierra el caso
 
 ¡Sistema de Supervisor completamente funcional! 🚀
 
+
+
+
+
+

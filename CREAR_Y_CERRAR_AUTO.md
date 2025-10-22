@@ -695,3 +695,8 @@ http://localhost:8080
 
 **¿Puedes ver el botón verde "✅ Crear y Cerrar Caso" cuando seleccionas SÍ?** 🎯
 
+
+
+
+
+

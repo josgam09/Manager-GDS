@@ -1252,3 +1252,4 @@ export function getScriptsStats() {
 export { tipoSolicitudScripts, reclamoIncidenteScripts };
 
 
+

@@ -274,3 +274,8 @@ El sistema está **completamente funcional** y listo para producción (con crede
 **¡Disfruta del sistema Manager-GDS!** 🚀
 
 
+
+
+
+
+

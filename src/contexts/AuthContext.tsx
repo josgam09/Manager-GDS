@@ -1,94 +1,112 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, UserRole, DEMO_USERS } from '@/types/user';
-import { useNavigate } from 'react-router-dom';
+import { User, UserRole } from '../types/user';
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => boolean;
   logout: () => void;
-  isAuthenticated: boolean;
-  hasRole: (roles: UserRole | UserRole[]) => boolean;
+  hasRole: (role: UserRole) => boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+// Usuarios demo para testing
+interface DemoUser extends User {
+  password: string;
+}
 
-  // Cargar usuario del localStorage al iniciar
+const DEMO_USERS: DemoUser[] = [
+  {
+    id: '1',
+    name: 'Administrador',
+    email: 'admin@jetsmart.com',
+    password: 'password123',
+    role: 'ADMINISTRADOR',
+    isActive: true,
+    createdAt: new Date('2025-01-01')
+  },
+  {
+    id: '2',
+    name: 'Supervisor Principal',
+    email: 'supervisor@jetsmart.com',
+    password: 'password123',
+    role: 'SUPERVISOR',
+    isActive: true,
+    createdAt: new Date('2025-01-01')
+  },
+  {
+    id: '3',
+    name: 'Analista GDS',
+    email: 'analista@jetsmart.com',
+    password: 'password123',
+    role: 'ANALISTA',
+    isActive: true,
+    createdAt: new Date('2025-01-01')
+  }
+];
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
-    const storedUser = localStorage.getItem('auth_user');
-    if (storedUser) {
+    // Verificar si hay un usuario guardado en localStorage
+    const savedUser = localStorage.getItem('gds_user');
+    if (savedUser) {
       try {
-        const parsedUser = JSON.parse(storedUser);
+        const parsedUser = JSON.parse(savedUser);
         setUser(parsedUser);
       } catch (error) {
-        localStorage.removeItem('auth_user');
+        console.error('Error parsing saved user:', error);
+        localStorage.removeItem('gds_user');
       }
     }
+    setIsLoading(false);
   }, []);
 
   const login = (email: string, password: string): boolean => {
-    // Buscar usuario en las credenciales demo
     const foundUser = DEMO_USERS.find(
-      (u) => u.email === email && u.password === password && u.isActive
+      u => u.email === email && u.password === password && u.isActive
     );
 
     if (foundUser) {
-      const userToStore: User = {
-        id: foundUser.id,
-        name: foundUser.name,
-        email: foundUser.email,
-        role: foundUser.role,
-        isActive: foundUser.isActive,
-        createdAt: foundUser.createdAt,
-        lastLogin: new Date(),
-      };
-
-      setUser(userToStore);
-      localStorage.setItem('auth_user', JSON.stringify(userToStore));
+      const { password: _, ...userWithoutPassword } = foundUser;
+      setUser(userWithoutPassword);
+      localStorage.setItem('gds_user', JSON.stringify(userWithoutPassword));
       return true;
     }
-
     return false;
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('auth_user');
+    localStorage.removeItem('gds_user');
   };
 
-  const hasRole = (roles: UserRole | UserRole[]): boolean => {
-    if (!user) return false;
-    
-    if (Array.isArray(roles)) {
-      return roles.includes(user.role);
-    }
-    
-    return user.role === roles;
+  const hasRole = (role: UserRole): boolean => {
+    return user?.role === role;
+  };
+
+  const value: AuthContextType = {
+    user,
+    login,
+    logout,
+    hasRole,
+    isLoading
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        login,
-        logout,
-        isAuthenticated: !!user,
-        hasRole,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
-
-
