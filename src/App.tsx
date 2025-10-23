@@ -48,7 +48,7 @@ const App = () => (
                         <Route 
                           path="/requirements/new" 
                           element={
-                            <ProtectedRoute allowedRoles={['ADMINISTRADOR', 'ANALISTA']}>
+                            <ProtectedRoute allowedRoles={['ADMINISTRADOR', 'ANALISTA', 'SUPERVISOR']}>
                               <RequirementForm />
                             </ProtectedRoute>
                           } 
