@@ -303,12 +303,11 @@ const RequirementFormNew = () => {
                   Número Único del Requerimiento
                 </Label>
                 <div className="relative">
-                  <Input
-                    id="ticketNumber"
-                    value={ticketNumber}
-                    readOnly
-                    className="bg-primary/5 border-primary/30 font-mono text-3xl font-bold text-primary text-center py-4 px-6 tracking-wider"
-                  />
+                  <div className="bg-primary/5 border-primary/30 border rounded-md py-4 px-6 text-center">
+                    <span className="text-primary text-xl font-semibold tracking-wide">
+                      {ticketNumber}
+                    </span>
+                  </div>
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 rounded-md pointer-events-none"></div>
                 </div>
               </div>
