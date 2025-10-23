@@ -18,23 +18,7 @@ import {
   OrigenConsulta, 
   TipoSolicitud,
   MotivoSolicitud,
-  MotivoReclamo,
-  SubMotivoCambioStatusSabre,
-  SubMotivoCambioStatusAmadeus,
-  SubMotivoCertificadoMedico,
-  SubMotivoCambioNombre,
-  SubMotivoFacturacion,
-  SubMotivoOpcionalesBundles,
-  SubMotivoPoliticaComercial,
-  SubMotivoRemisiones,
-  SubMotivoDevolucionesSolicitud,
-  SubMotivoPagos,
-  SubMotivoCheckInSolicitud,
-  SubMotivoDistribucion,
-  SubMotivoDevolucionesReclamo,
-  SubMotivoCheckInReclamo,
-  SubMotivoAlternativas,
-  SubMotivoBSP
+  MotivoReclamo
 } from '@/types/requirement';
 
 const RequirementFormNew = () => {
@@ -100,48 +84,59 @@ const RequirementFormNew = () => {
     switch (motivo) {
       case 'Cambio de Status':
         return origenConsulta === 'SABRE' 
-          ? Object.values(SubMotivoCambioStatusSabre)
-          : Object.values(SubMotivoCambioStatusAmadeus);
+          ? [
+              'OPEN - Unused', 'USED - Lifted/boarded', 'VOID - Transaction voided',
+              'PRTD - Flight coupons printed', 'EXCH - Exchanged/reissued', 'RFND - Refunded',
+              'CKIN - Checked in', 'CTRL - Under airport control', 'ACTL - Under airport control',
+              'SUSP - Suspended by carrier', 'OK - Okay for travel', 'REAC - Reactivated',
+              '**** - Unavailable for changes', 'TKT - Ticketed', 'IREG - Irregular Operations'
+            ]
+          : [
+              'O - Open for Use', 'A - Airport Control', 'C - Checked-in', 'L - Lifted / Used',
+              'F - Flown', 'R - Refunded', 'E - Exchanged / Reissued', 'V - Voided',
+              'S - Suspended', 'P - Printed', 'I - Irregular / Involuntary Exchange',
+              'N - No-show', 'Z - Cancelled', 'T - Ticketed'
+            ];
       
       case 'Certificado Médico':
-        return Object.values(SubMotivoCertificadoMedico);
+        return ['Políticas', 'Exoneración', 'Excepciones'];
       
       case 'Cambio de Nombre':
-        return Object.values(SubMotivoCambioNombre);
+        return ['Cambio de nombre', 'Error tipográfico', 'Ley Cesión'];
       
       case 'Facturación':
-        return Object.values(SubMotivoFacturacion);
+        return ['Bsp Paraguay', 'Aeropuerto', 'compras post-booking'];
       
       case 'Opcionales – Bundles':
-        return Object.values(SubMotivoOpcionalesBundles);
+        return ['Cotización Post-booking', 'Compra Post-booking', 'Confirmación bundles', 'Familias tarifarias'];
       
       case 'Política Comercial':
-        return Object.values(SubMotivoPoliticaComercial);
+        return ['Equipajes', 'Penalidades', 'ADMs', 'ACMs', 'Vuelos afectados', 'Devoluciones', 'Medios de pago', 'Emisiónes'];
       
       case 'Remisiones':
-        return Object.values(SubMotivoRemisiones);
+        return ['Voluntarias', 'Involuntarias', 'Excepciones - Exoneración de penalidad', 'Excepciones - Cambio sin costo'];
       
       case 'Devoluciones':
         return tipoSolicitud === 'Solicitudes' 
-          ? Object.values(SubMotivoDevolucionesSolicitud)
-          : Object.values(SubMotivoDevolucionesReclamo);
+          ? ['Afectación', 'Excepciones Comerciales', 'ACMs', 'Tarifa reembolsable (BR G2)', 'Enfermedad', 'Defunción', 'Retracto']
+          : ['Vuelo afectado', 'Estados de devolución', 'Comprobantes', 'Cobros de ATO'];
       
       case 'Pagos':
-        return Object.values(SubMotivoPagos);
+        return ['Links de pago', 'Navitaire AR', 'Monedero'];
       
       case 'Check-In':
         return tipoSolicitud === 'Solicitudes'
-          ? Object.values(SubMotivoCheckInSolicitud)
-          : Object.values(SubMotivoCheckInReclamo);
+          ? ['Tiempos para realizar Check-in', 'Cambio de fecha de nacimiento CHD', 'Agregar infante']
+          : ['Error sitio web', 'PNRS multisegmentos', 'OVBK'];
       
       case 'Distribución':
-        return Object.values(SubMotivoDistribucion);
+        return ['Actualización en Inventario', 'Issue Emisión', 'Políticas', 'Segmentos no Confirmados (HX, UC, NO)', 'Control Ato', 'Tiquete no sincronizado', 'Otros'];
       
       case 'Alternativas':
-        return Object.values(SubMotivoAlternativas);
+        return ['Afectación - Operacional', 'Afectación - Comercial', 'Sobreventa', 'Cancelación - Operacional', 'Cancelación - Comercial'];
       
       case 'BSP':
-        return Object.values(SubMotivoBSP);
+        return ['Pago Duplicado', 'Pago sin emisión de tiquete'];
       
       default:
         return [];
