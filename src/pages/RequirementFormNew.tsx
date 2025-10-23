@@ -23,7 +23,16 @@ import {
 
 const RequirementFormNew = () => {
   const navigate = useNavigate();
-  const { addRequirement } = useRequirements();
+  const { addRequirement, requirements } = useRequirements();
+
+  // Generar número único del ticket
+  const generateTicketNumber = () => {
+    const year = new Date().getFullYear();
+    const nextNumber = requirements.length + 1;
+    return `GDS-${year}-${String(nextNumber).padStart(3, '0')}`;
+  };
+
+  const ticketNumber = generateTicketNumber();
 
   // Sección 1: Información del Asesor
   const [nombreAsesor, setNombreAsesor] = useState<AsesorName | ''>('');
@@ -232,6 +241,7 @@ const RequirementFormNew = () => {
     }
 
     const newRequirement = {
+      ticketNumber, // Usar el número generado
       nombreAsesor: nombreAsesor as AsesorName,
       horaIngresoCorreo,
       correoElectronico,
@@ -278,6 +288,33 @@ const RequirementFormNew = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Número de Ticket */}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-primary">
+              <FileText className="h-5 w-5" />
+              Número de Ticket Asignado
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <Label htmlFor="ticketNumber">Número Único del Requerimiento</Label>
+                <Input
+                  id="ticketNumber"
+                  value={ticketNumber}
+                  readOnly
+                  className="bg-muted font-mono text-lg font-semibold"
+                />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <p>Este número se genera automáticamente</p>
+                <p>y será único para este requerimiento</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Sección 1: Información del Asesor */}
         <Card>
           <CardHeader>

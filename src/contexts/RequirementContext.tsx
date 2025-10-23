@@ -3,7 +3,7 @@ import { Requirement, RequirementStatus, RequirementPriority } from '@/types/req
 
 interface RequirementContextType {
   requirements: Requirement[];
-  addRequirement: (requirement: Omit<Requirement, 'id' | 'createdAt' | 'updatedAt' | 'history' | 'ticketNumber'>) => void;
+  addRequirement: (requirement: Omit<Requirement, 'id' | 'createdAt' | 'updatedAt' | 'history'>) => void;
   updateRequirement: (id: string, updates: Partial<Requirement>) => void;
   deleteRequirement: (id: string) => void;
   getRequirement: (id: string) => Requirement | undefined;
@@ -151,12 +151,10 @@ const mockRequirements: Requirement[] = [
 export const RequirementProvider = ({ children }: { children: ReactNode }) => {
   const [requirements, setRequirements] = useState<Requirement[]>(mockRequirements);
 
-  const addRequirement = (requirement: Omit<Requirement, 'id' | 'createdAt' | 'updatedAt' | 'history' | 'ticketNumber'>) => {
-    const ticketNumber = `GDS-${new Date().getFullYear()}-${String(requirements.length + 1).padStart(3, '0')}`;
+  const addRequirement = (requirement: Omit<Requirement, 'id' | 'createdAt' | 'updatedAt' | 'history'>) => {
     const newRequirement: Requirement = {
       ...requirement,
       id: Date.now().toString(),
-      ticketNumber,
       createdAt: new Date(),
       updatedAt: new Date(),
       history: [
