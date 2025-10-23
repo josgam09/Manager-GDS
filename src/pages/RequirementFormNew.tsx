@@ -290,45 +290,43 @@ const RequirementFormNew = () => {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto py-4 space-y-4">
       <div className="flex items-center gap-4">
         <Button onClick={() => navigate('/requirements')} variant="outline" size="sm">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Volver
         </Button>
-        <h1 className="text-3xl font-bold">Nuevo Requerimiento</h1>
+        <h1 className="text-2xl font-bold">Nuevo Requerimiento</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Número de Ticket */}
-        <Card className="border-primary/30 bg-primary/10 shadow-lg">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-primary text-xl">
-              <FileText className="h-6 w-6" />
+        <Card className="border-primary/30 bg-primary/10">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-primary text-base">
+              <FileText className="h-4 w-4" />
               Número de Ticket Asignado
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-6">
+          <CardContent className="pt-0">
+            <div className="flex items-center gap-4">
               <div className="flex-1">
-                <Label htmlFor="ticketNumber" className="text-base font-medium mb-2 block">
+                <Label htmlFor="ticketNumber" className="text-sm font-medium mb-1 block">
                   Número Único del Requerimiento
                 </Label>
                 <div className="relative">
-                  <div className="bg-primary/5 border-primary/30 border rounded-md py-4 px-6 text-center">
-                    <span className="text-primary text-xl font-semibold tracking-wide">
+                  <div className="bg-primary/5 border-primary/30 border rounded-md py-2 px-4 text-center">
+                    <span className="text-primary text-lg font-semibold tracking-wide">
                       {ticketNumber}
                     </span>
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 rounded-md pointer-events-none"></div>
                 </div>
               </div>
-              <div className="text-sm text-muted-foreground max-w-xs">
-                <div className="bg-white/50 dark:bg-black/20 p-3 rounded-lg">
+              <div className="text-xs text-muted-foreground max-w-xs">
+                <div className="bg-white/50 dark:bg-black/20 p-2 rounded-lg">
                   <p className="font-medium text-primary mb-1">ℹ️ Información:</p>
                   <p>Este número se genera automáticamente</p>
-                  <p>y será único para este requerimiento</p>
-                  <p className="text-xs mt-2 text-muted-foreground">
+                  <p className="text-xs mt-1 text-muted-foreground">
                     Formato: GDS-AÑO-NÚMERO
                   </p>
                 </div>
@@ -339,14 +337,14 @@ const RequirementFormNew = () => {
 
         {/* Sección 1: Información del Asesor */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <User className="h-4 w-4" />
               Sección 1: Información del Asesor
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+          <CardContent className="pt-0 space-y-3">
+            <div className="grid gap-3 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="nombreAsesor">Asesor *</Label>
                 <Select value={nombreAsesor} onValueChange={(value) => setNombreAsesor(value as AsesorName)}>
@@ -410,14 +408,14 @@ const RequirementFormNew = () => {
 
         {/* Sección 2: Origen de Consulta */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5" />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Globe className="h-4 w-4" />
               Sección 2: Origen de Consulta
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-3">
+          <CardContent className="pt-0 space-y-3">
+            <div className="grid gap-3 md:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="pais">País *</Label>
                 <Select value={pais} onValueChange={(value) => setPais(value as Pais)}>
@@ -469,13 +467,13 @@ const RequirementFormNew = () => {
 
         {/* Sección 3: Datos del Cliente */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <FileText className="h-4 w-4" />
               Sección 3: Datos del Cliente
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-0 space-y-3">
             <div className="space-y-2">
               <Label htmlFor="pnrTktLocalizador">PNR/TKT/Localizador *</Label>
               <Input
@@ -491,14 +489,14 @@ const RequirementFormNew = () => {
 
         {/* Sección 4: Clasificación */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5" />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <AlertCircle className="h-4 w-4" />
               Sección 4: Clasificación
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-3">
+          <CardContent className="pt-0 space-y-3">
+            <div className="grid gap-3 md:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="tipoSolicitud">Tipo de Solicitud *</Label>
                 <Select value={tipoSolicitud} onValueChange={(value) => setTipoSolicitud(value as TipoSolicitud)}>
@@ -568,10 +566,10 @@ const RequirementFormNew = () => {
 
         {/* Solicitud del Cliente */}
         <Card>
-          <CardHeader>
-            <CardTitle>Solicitud del Cliente</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Solicitud del Cliente</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <div className="space-y-2">
               <Label htmlFor="solicitudCliente">Descripción de la Solicitud *</Label>
               <Textarea
@@ -588,10 +586,10 @@ const RequirementFormNew = () => {
 
         {/* Control de Gestión de Casos */}
         <Card>
-          <CardHeader>
-            <CardTitle>Gestión del Caso</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Gestión del Caso</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-0 space-y-3">
             <div className="space-y-2">
               <Label>¿Puedes entregar la información requerida? *</Label>
               <RadioGroup value={casoOpcion} onValueChange={(value) => setCasoOpcion(value as CasoOpcion)}>
@@ -667,10 +665,10 @@ const RequirementFormNew = () => {
         {/* Información Brindada - Solo para casos que se van a cerrar */}
         {casoOpcion === 'SI_CERRAR_CASO' && (
           <Card>
-            <CardHeader>
-              <CardTitle>Información Brindada</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Información Brindada</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="pt-0 space-y-3">
               {availableScripts.length > 0 && (
                 <ScriptSelector
                   scripts={availableScripts}
@@ -705,11 +703,11 @@ const RequirementFormNew = () => {
         )}
 
         {/* Botones de Acción */}
-        <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={() => navigate('/requirements')}>
+        <div className="flex justify-end gap-3">
+          <Button type="button" variant="outline" size="sm" onClick={() => navigate('/requirements')}>
             Cancelar
           </Button>
-          <Button type="submit" className="gap-2">
+          <Button type="submit" size="sm" className="gap-2">
             {casoOpcion === 'SI_CERRAR_CASO' ? (
               <>
                 ✅ Crear y Cerrar Caso

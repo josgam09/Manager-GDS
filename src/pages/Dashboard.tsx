@@ -39,24 +39,24 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Encabezado */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard Manager GDS</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold">Dashboard Manager GDS</h1>
+          <p className="text-sm text-muted-foreground">
             Panel de control y gestión de requerimientos
           </p>
         </div>
         <div className="flex gap-2">
           <Link to="/requirements/new">
-            <Button className="gap-2">
+            <Button size="sm" className="gap-2">
               <Plus className="h-4 w-4" />
               Nuevo Requerimiento
             </Button>
           </Link>
           <Link to="/requirements">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2">
               <BarChart3 className="h-4 w-4" />
               Ver Todos
             </Button>
@@ -65,108 +65,120 @@ const Dashboard = () => {
       </div>
 
       {/* Estadísticas principales */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Requerimientos</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">
-              Todos los casos registrados
-            </p>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-muted-foreground">Total</p>
+                <p className="text-xl font-bold">{stats.total}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">En Gestión</CardTitle>
-            <Clock className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.enGestion}</div>
-            <p className="text-xs text-muted-foreground">
-              Casos activos en proceso
-            </p>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Clock className="h-5 w-5 text-blue-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-muted-foreground">En Gestión</p>
+                <p className="text-xl font-bold text-blue-600">{stats.enGestion}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Escalados</CardTitle>
-            <AlertCircle className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{stats.escalados}</div>
-            <p className="text-xs text-muted-foreground">
-              Requieren atención especial
-            </p>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <AlertCircle className="h-5 w-5 text-orange-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-muted-foreground">Escalados</p>
+                <p className="text-xl font-bold text-orange-600">{stats.escalados}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Cerrados</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.cerrados}</div>
-            <p className="text-xs text-muted-foreground">
-              Casos resueltos exitosamente
-            </p>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-muted-foreground">Cerrados</p>
+                <p className="text-xl font-bold text-green-600">{stats.cerrados}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Estadísticas secundarias */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-3">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Por Origen de Consulta</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Por Origen</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">AMADEUS</span>
-              <Badge variant="default">{origenStats.amadeus}</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">SABRE</span>
-              <Badge variant="secondary">{origenStats.sabre}</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">NO CORRESPONDE</span>
-              <Badge variant="outline">{origenStats.noCorresponde}</Badge>
+          <CardContent className="pt-0">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs">AMADEUS</span>
+                <Badge variant="default" className="text-xs">{origenStats.amadeus}</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs">SABRE</span>
+                <Badge variant="secondary" className="text-xs">{origenStats.sabre}</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs">NO CORRESPONDE</span>
+                <Badge variant="outline" className="text-xs">{origenStats.noCorresponde}</Badge>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Por Tipo de Solicitud</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Por Tipo</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Solicitudes</span>
-              <Badge variant="outline">{tipoStats.solicitudes}</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Reclamos</span>
-              <Badge variant="outline">{tipoStats.reclamos}</Badge>
+          <CardContent className="pt-0">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs">Solicitudes</span>
+                <Badge variant="outline" className="text-xs">{tipoStats.solicitudes}</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs">Reclamos</span>
+                <Badge variant="outline" className="text-xs">{tipoStats.reclamos}</Badge>
+              </div>
+              <div className="flex items-center justify-between pt-1 border-t">
+                <span className="text-xs font-medium">Críticos</span>
+                <Badge variant="destructive" className="text-xs">{stats.critica}</Badge>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Prioridad Crítica</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Acciones Rápidas</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-red-600">{stats.critica}</div>
-              <p className="text-sm text-muted-foreground">
-                Casos de máxima prioridad
-              </p>
+          <CardContent className="pt-0">
+            <div className="space-y-2">
+              <Link to="/requirements" className="block">
+                <Button variant="outline" size="sm" className="w-full justify-start gap-2">
+                  <BarChart3 className="h-3 w-3" />
+                  Ver Todos
+                </Button>
+              </Link>
+              <Link to="/requirements/new" className="block">
+                <Button size="sm" className="w-full justify-start gap-2">
+                  <Plus className="h-3 w-3" />
+                  Nuevo Caso
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
@@ -174,17 +186,17 @@ const Dashboard = () => {
 
       {/* Tabla de requerimientos */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            Listado de Requerimientos
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Requerimientos Recientes
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <RequirementsTable 
-            requirements={requirements}
-            title="Dashboard - Requerimientos"
-            showFilters={true}
+            requirements={requirements.slice(0, 8)}
+            title=""
+            showFilters={false}
           />
         </CardContent>
       </Card>

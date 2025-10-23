@@ -290,133 +290,133 @@ const RequirementsTable: React.FC<RequirementsTableProps> = ({
           <TableHeader>
             <TableRow>
               <TableHead 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 text-xs"
                 onClick={() => handleSort('ticketNumber')}
               >
-                <div className="flex items-center gap-2">
-                  Número Único
+                <div className="flex items-center gap-1">
+                  Número
                   {getSortIcon('ticketNumber')}
                 </div>
               </TableHead>
               <TableHead 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 text-xs"
                 onClick={() => handleSort('status')}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   Estado
                   {getSortIcon('status')}
                 </div>
               </TableHead>
               <TableHead 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 text-xs"
                 onClick={() => handleSort('statusChangedAt')}
               >
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Tiempo por Estado
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  Tiempo Estado
                   {getSortIcon('statusChangedAt')}
                 </div>
               </TableHead>
               <TableHead 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 text-xs"
                 onClick={() => handleSort('pais')}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   País
                   {getSortIcon('pais')}
                 </div>
               </TableHead>
               <TableHead 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 text-xs"
                 onClick={() => handleSort('initialDate')}
               >
-                <div className="flex items-center gap-2">
-                  Fecha Ingreso
+                <div className="flex items-center gap-1">
+                  Fecha
                   {getSortIcon('initialDate')}
                 </div>
               </TableHead>
               <TableHead 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 text-xs"
                 onClick={() => handleSort('horaIngresoCorreo')}
               >
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Tiempo Transcurrido
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  Hora Ingreso
                   {getSortIcon('horaIngresoCorreo')}
                 </div>
               </TableHead>
               <TableHead 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 text-xs"
                 onClick={() => handleSort('asuntoCorreoElectronico')}
               >
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
+                <div className="flex items-center gap-1">
+                  <Mail className="h-3 w-3" />
                   Asunto
                   {getSortIcon('asuntoCorreoElectronico')}
                 </div>
               </TableHead>
               <TableHead 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 text-xs"
                 onClick={() => handleSort('origenConsulta')}
               >
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />
+                <div className="flex items-center gap-1">
+                  <Building2 className="h-3 w-3" />
                   Origen
                   {getSortIcon('origenConsulta')}
                 </div>
               </TableHead>
               <TableHead 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 text-xs"
                 onClick={() => handleSort('tipoSolicitud')}
               >
-                <div className="flex items-center gap-2">
-                  Tipo Claims
+                <div className="flex items-center gap-1">
+                  Tipo
                   {getSortIcon('tipoSolicitud')}
                 </div>
               </TableHead>
               <TableHead 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 text-xs"
                 onClick={() => handleSort('motivo')}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   Motivo
                   {getSortIcon('motivo')}
                 </div>
               </TableHead>
               <TableHead 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 text-xs"
                 onClick={() => handleSort('subMotivo')}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   Sub Motivo
                   {getSortIcon('subMotivo')}
                 </div>
               </TableHead>
               <TableHead 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 text-xs"
                 onClick={() => handleSort('assignedTo')}
               >
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Asignado a
+                <div className="flex items-center gap-1">
+                  <User className="h-3 w-3" />
+                  Asignado
                   {getSortIcon('assignedTo')}
                 </div>
               </TableHead>
               <TableHead 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 text-xs"
                 onClick={() => handleSort('priority')}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   Estado Final
                   {getSortIcon('priority')}
                 </div>
               </TableHead>
               <TableHead 
-                className="cursor-pointer hover:bg-muted/50"
+                className="cursor-pointer hover:bg-muted/50 text-xs"
                 onClick={() => handleSort('initialDate')}
               >
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
                   Tiempo Total
                   {getSortIcon('initialDate')}
                 </div>
@@ -430,32 +430,32 @@ const RequirementsTable: React.FC<RequirementsTableProps> = ({
                 className="hover:bg-muted/50 cursor-pointer"
                 onClick={() => handleRowClick(requirement.id)}
               >
-                <TableCell className="font-mono text-sm">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{requirement.ticketNumber}</Badge>
-                    <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                <TableCell className="font-mono text-xs">
+                  <div className="flex items-center gap-1">
+                    <Badge variant="outline" className="text-xs">{requirement.ticketNumber}</Badge>
+                    <ExternalLink className="h-2 w-2 text-muted-foreground" />
                   </div>
                 </TableCell>
                 <TableCell>
                   <RequirementStatusBadge status={requirement.status} />
                 </TableCell>
-                <TableCell className="text-sm">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-3 w-3 text-muted-foreground" />
+                <TableCell className="text-xs">
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-2 w-2 text-muted-foreground" />
                     <span className="font-mono">
                       {calcularTiempoPorEstado(requirement.statusChangedAt)}
                     </span>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{requirement.pais}</Badge>
+                  <Badge variant="secondary" className="text-xs">{requirement.pais}</Badge>
                 </TableCell>
-                <TableCell className="text-sm">
+                <TableCell className="text-xs">
                   {new Date(requirement.initialDate).toLocaleDateString('es-AR')}
                 </TableCell>
-                <TableCell className="text-sm">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-3 w-3 text-muted-foreground" />
+                <TableCell className="text-xs">
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-2 w-2 text-muted-foreground" />
                     <span className="font-mono">
                       {requirement.status === 'cerrado' && requirement.resolvedAt
                         ? calculateTimeElapsed(requirement.horaIngresoCorreo, requirement.initialDate)
@@ -464,22 +464,22 @@ const RequirementsTable: React.FC<RequirementsTableProps> = ({
                     </span>
                   </div>
                 </TableCell>
-                <TableCell className="max-w-xs">
+                <TableCell className="max-w-xs text-xs">
                   <div className="truncate" title={requirement.asuntoCorreoElectronico}>
                     {requirement.asuntoCorreoElectronico}
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={requirement.origenConsulta === 'AMADEUS' ? 'default' : 'secondary'}>
+                  <Badge variant={requirement.origenConsulta === 'AMADEUS' ? 'default' : 'secondary'} className="text-xs">
                     {requirement.origenConsulta}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline">{requirement.tipoSolicitud}</Badge>
+                  <Badge variant="outline" className="text-xs">{requirement.tipoSolicitud}</Badge>
                 </TableCell>
-                <TableCell className="text-sm">{requirement.motivo}</TableCell>
-                <TableCell className="text-sm">{requirement.subMotivo}</TableCell>
-                <TableCell className="text-sm">
+                <TableCell className="text-xs">{requirement.motivo}</TableCell>
+                <TableCell className="text-xs">{requirement.subMotivo}</TableCell>
+                <TableCell className="text-xs">
                   {requirement.assignedTo || (
                     <span className="text-muted-foreground italic">Sin asignar</span>
                   )}
@@ -487,9 +487,9 @@ const RequirementsTable: React.FC<RequirementsTableProps> = ({
                 <TableCell>
                   <RequirementPriorityBadge priority={requirement.priority} />
                 </TableCell>
-                <TableCell className="text-sm">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-3 w-3 text-muted-foreground" />
+                <TableCell className="text-xs">
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-2 w-2 text-muted-foreground" />
                     <span className="font-mono">
                       {calcularTiempoTotal(requirement.initialDate)}
                     </span>
