@@ -98,8 +98,8 @@ const Layout = ({ children }: LayoutProps) => {
                             group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors
                             ${
                               isActive(item.href)
-                                ? 'bg-sidebar-accent text-sidebar-primary'
-                                : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-primary'
+                                ? 'bg-sidebar-accent text-white'
+                                : 'text-white hover:bg-sidebar-accent hover:text-white'
                             }
                           `}
                         >
