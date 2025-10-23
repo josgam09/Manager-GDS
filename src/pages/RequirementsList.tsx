@@ -36,7 +36,7 @@ const RequirementsList = () => {
         requirement.pnrTktLocalizador.toLowerCase().includes(search.toLowerCase()) ||
         requirement.correoElectronico.toLowerCase().includes(search.toLowerCase()) ||
         (requirement.tipoSolicitud && requirement.tipoSolicitud.toLowerCase().includes(search.toLowerCase())) ||
-        (requirement.reclamoIncidente && requirement.reclamoIncidente.toLowerCase().includes(search.toLowerCase()));
+        (requirement.asuntoCorreoElectronico && requirement.asuntoCorreoElectronico.toLowerCase().includes(search.toLowerCase()));
       
       const matchesStatus = statusFilter === 'all' || requirement.status === statusFilter;
       const matchesPriority = priorityFilter === 'all' || requirement.priority === priorityFilter;
@@ -63,7 +63,7 @@ const RequirementsList = () => {
       req.pnrTktLocalizador,
       req.correoElectronico,
       req.tipoSolicitud || '',
-      req.reclamoIncidente || '',
+      req.motivo || '',
       req.solicitudCliente,
       req.informacionBrindada || '',
       req.observaciones || '',
@@ -215,7 +215,7 @@ const RequirementsList = () => {
                         )}
                       </div>
                       <h3 className="font-semibold mb-1">
-                        {requirement.tipoSolicitud || requirement.reclamoIncidente || 'Requerimiento GDS'}
+                        {requirement.tipoSolicitud || 'Requerimiento GDS'}
                       </h3>
                       <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                         {requirement.solicitudCliente}
