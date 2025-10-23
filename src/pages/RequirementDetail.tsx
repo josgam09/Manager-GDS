@@ -114,7 +114,10 @@ const RequirementDetail = () => {
 
     updateRequirement(requirement.id, updates);
     
-    toast.success('Respuesta de agencia confirmada. Ahora puedes evaluar si tienes la información para resolver el caso.');
+    // Inmediatamente mostrar las opciones de gestión del caso
+    setShowCaseManagement(true);
+    
+    toast.success('Respuesta de agencia confirmada. Ahora evalúa si puedes resolver el caso.');
   };
 
   const handleOtherAreaResponse = () => {
@@ -151,31 +154,10 @@ const RequirementDetail = () => {
 
     updateRequirement(requirement.id, updates);
     
-    toast.success(`Respuesta de ${requirement.areaEscalamiento} confirmada. Ahora puedes evaluar si tienes la información para resolver el caso.`);
-  };
-
-  const handleRestartCaseManagement = () => {
-    if (!requirement || !user) return;
-
-    const updates = {
-      casoOpcion: 'SI_CERRAR_CASO', // Reiniciar a la opción de cerrar caso
-      status: 'nuevo', // Volver a estado nuevo para nueva evaluación
-      updatedAt: new Date(),
-      history: [
-        ...requirement.history,
-        {
-          id: Date.now().toString(),
-          date: new Date(),
-          action: 'Flujo de gestión reiniciado - Nueva evaluación',
-          user: user.name,
-          comment: 'El caso ha sido reiniciado para nueva evaluación después de recibir respuesta de agencia',
-        },
-      ],
-    };
-
-    updateRequirement(requirement.id, updates);
+    // Inmediatamente mostrar las opciones de gestión del caso
+    setShowCaseManagement(true);
     
-    toast.success('Flujo de gestión reiniciado. Ahora puedes evaluar nuevamente si tienes la información para resolver el caso.');
+    toast.success(`Respuesta de ${requirement.areaEscalamiento} confirmada. Ahora evalúa si puedes resolver el caso.`);
   };
 
   const handleStartCaseManagement = () => {
@@ -231,17 +213,22 @@ const RequirementDetail = () => {
 
     // Determinar el estado según la opción seleccionada
     let nuevoEstado: any = 'nuevo';
+    let mensajeAccion = '';
     
     if (caseManagementOption === 'SI_CERRAR_CASO') {
       nuevoEstado = 'cerrado';
+      mensajeAccion = 'Caso cerrado exitosamente';
     } else if (caseManagementOption === 'NO_ESCALAR_CASO') {
       if (escaladoA === 'SUPERVISOR') {
         nuevoEstado = 'pendiente-supervisor';
+        mensajeAccion = 'Caso escalado al supervisor';
       } else if (escaladoA === 'OTRA_AREA') {
         nuevoEstado = 'pendiente-otra-area';
+        mensajeAccion = `Caso escalado al área de ${areaEscalamiento}`;
       }
     } else if (caseManagementOption === 'NO_INTERACTUAR_AGENCIA') {
       nuevoEstado = 'pendiente-agencia';
+      mensajeAccion = 'Caso marcado para interacción con agencia';
     }
 
     const updates = {
@@ -258,7 +245,7 @@ const RequirementDetail = () => {
         {
           id: Date.now().toString(),
           date: new Date(),
-          action: `Gestión de caso completada - ${caseManagementOption === 'SI_CERRAR_CASO' ? 'Caso cerrado' : caseManagementOption === 'NO_ESCALAR_CASO' ? 'Caso escalado' : 'Caso marcado para interacción con agencia'}`,
+          action: mensajeAccion,
           user: user.name,
           comment: `Opción seleccionada: ${caseManagementOption}`,
         },
@@ -275,13 +262,7 @@ const RequirementDetail = () => {
     setAnalisisAnalista('');
     setInformacionBrindada('');
     
-    const actionText = caseManagementOption === 'SI_CERRAR_CASO' 
-      ? 'caso cerrado exitosamente' 
-      : caseManagementOption === 'NO_ESCALAR_CASO'
-      ? 'caso escalado exitosamente'
-      : 'caso marcado para interacción con agencia';
-    
-    toast.success(`Gestión completada: ${actionText}`);
+    toast.success(mensajeAccion);
   };
 
   if (!requirement) {
@@ -477,11 +458,11 @@ const RequirementDetail = () => {
                           Con la información de la agencia, evalúa si puedes proporcionar la solución al cliente.
                         </p>
                         <Button 
-                          onClick={handleRestartCaseManagement}
+                          onClick={() => setShowCaseManagement(true)}
                           className="gap-2 bg-green-600 hover:bg-green-700"
                         >
                           <CheckCircle2 className="h-4 w-4" />
-                          Reiniciar Evaluación de Caso
+                          Evaluar Caso Ahora
                         </Button>
                       </div>
                     )}
@@ -623,11 +604,11 @@ const RequirementDetail = () => {
                           Con la información de {requirement.areaEscalamiento}, evalúa si puedes proporcionar la solución al cliente.
                         </p>
                         <Button 
-                          onClick={handleRestartCaseManagement}
+                          onClick={() => setShowCaseManagement(true)}
                           className="gap-2 bg-green-600 hover:bg-green-700"
                         >
                           <CheckCircle2 className="h-4 w-4" />
-                          Reiniciar Evaluación de Caso
+                          Evaluar Caso Ahora
                         </Button>
                       </div>
                     )}
