@@ -82,10 +82,7 @@ const Layout = ({ children }: LayoutProps) => {
             <div className="p-2 bg-white rounded-lg shadow-sm">
               <Server className="h-8 w-8" style={{ color: 'hsl(var(--sidebar-logo))' }} />
             </div>
-            <h1 className="text-2xl font-bold" style={{ 
-              color: 'hsl(var(--sidebar-logo))',
-              textShadow: '2px 2px 4px rgba(255,255,255,0.8), -1px -1px 2px rgba(255,255,255,0.8), 1px -1px 2px rgba(255,255,255,0.8), -1px 1px 2px rgba(255,255,255,0.8)'
-            }}>Manager GDS</h1>
+            <h1 className="text-2xl font-bold text-white">Manager GDS</h1>
           </div>
           <nav className="flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -232,10 +229,7 @@ const Layout = ({ children }: LayoutProps) => {
             <div className="p-1.5 bg-white rounded-md shadow-sm">
               <Server className="h-6 w-6" style={{ color: 'hsl(var(--sidebar-logo))' }} />
             </div>
-            <h1 className="text-xl font-bold" style={{ 
-              color: 'hsl(var(--sidebar-logo))',
-              textShadow: '1px 1px 3px rgba(255,255,255,0.8), -1px -1px 2px rgba(255,255,255,0.8), 1px -1px 2px rgba(255,255,255,0.8), -1px 1px 2px rgba(255,255,255,0.8)'
-            }}>Manager GDS</h1>
+            <h1 className="text-xl font-bold text-white">Manager GDS</h1>
           </div>
         </div>
       </div>
