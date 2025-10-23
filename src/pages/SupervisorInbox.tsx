@@ -1,201 +1,163 @@
-import { useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useRequirements } from '@/contexts/RequirementContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import RequirementStatusBadge from '@/components/RequirementStatusBadge';
-import RequirementPriorityBadge from '@/components/RequirementPriorityBadge';
-import { Inbox, Search, Home, AlertCircle, Clock } from 'lucide-react';
-import { RequirementPriority } from '@/types/requirement';
+import RequirementsTable from '@/components/RequirementsTable';
+import { Inbox, Home, AlertCircle, Clock } from 'lucide-react';
 
 const SupervisorInbox = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { requirements } = useRequirements();
-  const [search, setSearch] = useState('');
-  const [priorityFilter, setPriorityFilter] = useState<RequirementPriority | 'all'>('all');
 
   // Filtrar casos escalados a supervisor
   const escaladosASupervisor = useMemo(() => {
     return requirements.filter((req) => {
-      const esEscaladoSupervisor = req.status === 'pendiente-supervisor';
-      const matchesSearch = search
-        ? req.ticketNumber.toLowerCase().includes(search.toLowerCase()) ||
-          req.nombreAsesor.toLowerCase().includes(search.toLowerCase()) ||
-          req.solicitudCliente.toLowerCase().includes(search.toLowerCase())
-        : true;
-      const matchesPriority = priorityFilter === 'all' || req.priority === priorityFilter;
-
-      return esEscaladoSupervisor && matchesSearch && matchesPriority;
+      return req.status === 'pendiente-supervisor';
     });
-  }, [requirements, search, priorityFilter]);
+  }, [requirements]);
 
   // Estadísticas
   const stats = {
     total: escaladosASupervisor.length,
     criticos: escaladosASupervisor.filter(r => r.priority === 'critica').length,
     altos: escaladosASupervisor.filter(r => r.priority === 'alta').length,
+    medios: escaladosASupervisor.filter(r => r.priority === 'media').length,
+    bajos: escaladosASupervisor.filter(r => r.priority === 'baja').length,
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center flex-wrap gap-4">
+      {/* Encabezado */}
+      <div className="flex items-center justify-between">
         <div>
-          <div className="flex gap-2 mb-2">
-            <Button onClick={() => navigate('/')} variant="outline" size="sm" className="gap-2">
-              <Home className="h-4 w-4" />
-              Inicio
-            </Button>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <Inbox className="h-8 w-8 text-orange-600" />
-            Bandeja de Supervisor
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Casos escalados que requieren tu atención
+          <h1 className="text-3xl font-bold">Bandeja del Supervisor</h1>
+          <p className="text-muted-foreground">
+            Casos escalados que requieren atención del supervisor
           </p>
+        </div>
+        <div className="flex gap-2">
+          <Link to="/">
+            <Button variant="outline" className="gap-2">
+              <Home className="h-4 w-4" />
+              Dashboard
+            </Button>
+          </Link>
+          <Link to="/requirements">
+            <Button variant="outline" className="gap-2">
+              <Inbox className="h-4 w-4" />
+              Todos los Requerimientos
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {/* Estadísticas rápidas */}
-      <div className="grid gap-4 md:grid-cols-3">
+      {/* Estadísticas */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Pendientes
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Escalados</CardTitle>
+            <Inbox className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats.total}</div>
+            <div className="text-2xl font-bold">{stats.total}</div>
+            <p className="text-xs text-muted-foreground">
+              Casos pendientes
+            </p>
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-destructive" />
-              Prioridad Crítica
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Críticos</CardTitle>
+            <AlertCircle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-destructive">{stats.criticos}</div>
+            <div className="text-2xl font-bold text-red-600">{stats.criticos}</div>
+            <p className="text-xs text-muted-foreground">
+              Máxima prioridad
+            </p>
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Clock className="h-4 w-4 text-warning" />
-              Prioridad Alta
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Alta Prioridad</CardTitle>
+            <Clock className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-warning">{stats.altos}</div>
+            <div className="text-2xl font-bold text-orange-600">{stats.altos}</div>
+            <p className="text-xs text-muted-foreground">
+              Requieren atención
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Media Prioridad</CardTitle>
+            <Clock className="h-4 w-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">{stats.medios}</div>
+            <p className="text-xs text-muted-foreground">
+              Atención normal
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Baja Prioridad</CardTitle>
+            <Clock className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{stats.bajos}</div>
+            <p className="text-xs text-muted-foreground">
+              Menor urgencia
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filtros */}
+      {/* Tabla de casos escalados */}
       <Card>
         <CardHeader>
-          <CardTitle>Filtros</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Inbox className="h-5 w-5" />
+            Casos Escalados al Supervisor
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por ticket, asesor o solicitud..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={priorityFilter} onValueChange={(value) => setPriorityFilter(value as RequirementPriority | 'all')}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filtrar por prioridad" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas las prioridades</SelectItem>
-                <SelectItem value="critica">Crítica</SelectItem>
-                <SelectItem value="alta">Alta</SelectItem>
-                <SelectItem value="media">Media</SelectItem>
-                <SelectItem value="baja">Baja</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Lista de casos */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Casos Pendientes ({escaladosASupervisor.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {escaladosASupervisor.length === 0 ? (
-              <div className="text-center py-12">
-                <Inbox className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground text-lg font-semibold">
-                  ¡Excelente! No hay casos pendientes
-                </p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Todos los casos escalados han sido atendidos
-                </p>
-              </div>
-            ) : (
-              escaladosASupervisor.map((requirement) => (
-                <Link
-                  key={requirement.id}
-                  to={`/requirements/${requirement.id}`}
-                  className="block p-4 rounded-lg border-2 border-orange-200 bg-orange-50/50 dark:bg-orange-950/20 hover:bg-orange-100/50 dark:hover:bg-orange-900/30 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className="text-xs font-mono text-muted-foreground bg-orange-100 dark:bg-orange-900/50 px-2 py-1 rounded">
-                          {requirement.ticketNumber}
-                        </span>
-                        <Badge variant="outline" className="text-xs">
-                          {requirement.origenConsulta}
-                        </Badge>
-                        <Badge variant="destructive" className="text-xs">
-                          ESCALADO
-                        </Badge>
-                      </div>
-                      <h3 className="font-semibold mb-1">
-                        {requirement.tipoSolicitud || requirement.reclamoIncidente || 'Requerimiento GDS'}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                        {requirement.solicitudCliente}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-2 text-sm">
-                        <RequirementStatusBadge status={requirement.status} />
-                        <RequirementPriorityBadge priority={requirement.priority} />
-                        <span className="text-muted-foreground">•</span>
-                        <span className="text-muted-foreground">Escalado por: {requirement.nombreAsesor}</span>
-                      </div>
-                    </div>
-                    <div className="text-right text-sm text-muted-foreground whitespace-nowrap">
-                      <div>{new Date(requirement.createdAt).toLocaleDateString('es-AR')}</div>
-                      <div className="text-xs mt-1">
-                        {requirement.horaIngresoCorreo}
-                      </div>
-                    </div>
-                  </div>
+          {escaladosASupervisor.length > 0 ? (
+            <RequirementsTable 
+              requirements={escaladosASupervisor}
+              title="Bandeja Supervisor"
+              showFilters={true}
+            />
+          ) : (
+            <div className="text-center py-12">
+              <Inbox className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+              <h3 className="text-lg font-semibold mb-2">No hay casos escalados</h3>
+              <p className="text-muted-foreground mb-4">
+                No hay requerimientos pendientes de tu atención en este momento.
+              </p>
+              <div className="flex gap-2 justify-center">
+                <Link to="/requirements">
+                  <Button variant="outline">
+                    Ver Todos los Requerimientos
+                  </Button>
                 </Link>
-              ))
-            )}
-          </div>
+                <Link to="/requirements/new">
+                  <Button>
+                    Crear Nuevo Requerimiento
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -203,10 +165,3 @@ const SupervisorInbox = () => {
 };
 
 export default SupervisorInbox;
-
-
-
-
-
-
-
