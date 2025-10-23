@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Requirement } from '@/types/requirement';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +24,8 @@ import {
   Calendar,
   User,
   Mail,
-  Building2
+  Building2,
+  ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -56,6 +58,7 @@ const RequirementsTable: React.FC<RequirementsTableProps> = ({
   showFilters = true,
   onExport
 }) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('initialDate');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -83,6 +86,11 @@ const RequirementsTable: React.FC<RequirementsTableProps> = ({
       const hours = Math.floor((diffMinutes % 1440) / 60);
       return `${days}d ${hours}h`;
     }
+  };
+
+  // Función para manejar el click en una fila
+  const handleRowClick = (requirementId: string) => {
+    navigate(`/requirements/${requirementId}`);
   };
 
   // Función para manejar el ordenamiento
@@ -395,9 +403,16 @@ const RequirementsTable: React.FC<RequirementsTableProps> = ({
           </TableHeader>
           <TableBody>
             {filteredAndSortedRequirements.map((requirement) => (
-              <TableRow key={requirement.id} className="hover:bg-muted/50">
+              <TableRow 
+                key={requirement.id} 
+                className="hover:bg-muted/50 cursor-pointer"
+                onClick={() => handleRowClick(requirement.id)}
+              >
                 <TableCell className="font-mono text-sm">
-                  <Badge variant="outline">{requirement.ticketNumber}</Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline">{requirement.ticketNumber}</Badge>
+                    <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                  </div>
                 </TableCell>
                 <TableCell>
                   <RequirementStatusBadge status={requirement.status} />
