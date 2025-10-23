@@ -289,27 +289,38 @@ const RequirementFormNew = () => {
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Número de Ticket */}
-        <Card className="border-primary/20 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-primary">
-              <FileText className="h-5 w-5" />
+        <Card className="border-primary/30 bg-primary/10 shadow-lg">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-primary text-xl">
+              <FileText className="h-6 w-6" />
               Número de Ticket Asignado
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
               <div className="flex-1">
-                <Label htmlFor="ticketNumber">Número Único del Requerimiento</Label>
-                <Input
-                  id="ticketNumber"
-                  value={ticketNumber}
-                  readOnly
-                  className="bg-muted font-mono text-lg font-semibold"
-                />
+                <Label htmlFor="ticketNumber" className="text-base font-medium mb-2 block">
+                  Número Único del Requerimiento
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="ticketNumber"
+                    value={ticketNumber}
+                    readOnly
+                    className="bg-primary/5 border-primary/30 font-mono text-3xl font-bold text-primary text-center py-4 px-6 tracking-wider"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 rounded-md pointer-events-none"></div>
+                </div>
               </div>
-              <div className="text-sm text-muted-foreground">
-                <p>Este número se genera automáticamente</p>
-                <p>y será único para este requerimiento</p>
+              <div className="text-sm text-muted-foreground max-w-xs">
+                <div className="bg-white/50 dark:bg-black/20 p-3 rounded-lg">
+                  <p className="font-medium text-primary mb-1">ℹ️ Información:</p>
+                  <p>Este número se genera automáticamente</p>
+                  <p>y será único para este requerimiento</p>
+                  <p className="text-xs mt-2 text-muted-foreground">
+                    Formato: GDS-AÑO-NÚMERO
+                  </p>
+                </div>
               </div>
             </div>
           </CardContent>
