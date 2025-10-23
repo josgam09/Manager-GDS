@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   Select,
   SelectContent,
@@ -14,7 +15,7 @@ import {
 } from '@/components/ui/select';
 import RequirementStatusBadge from '@/components/RequirementStatusBadge';
 import RequirementPriorityBadge from '@/components/RequirementPriorityBadge';
-import { Plus, Search, Download, Home } from 'lucide-react';
+import { Plus, Search, Download, Home, User, Clock, MapPin } from 'lucide-react';
 import { RequirementStatus, RequirementPriority, OrigenConsulta } from '@/types/requirement';
 import { toast } from 'sonner';
 
@@ -24,6 +25,26 @@ const RequirementsList = () => {
   const [statusFilter, setStatusFilter] = useState<RequirementStatus | 'all'>('all');
   const [priorityFilter, setPriorityFilter] = useState<RequirementPriority | 'all'>('all');
   const [origenFilter, setOrigenFilter] = useState<OrigenConsulta | 'all'>('all');
+  const [tipoFilter, setTipoFilter] = useState<'Solicitudes' | 'Reclamos' | 'all'>('all');
+
+  // Función para calcular tiempo transcurrido
+  const calcularTiempoTranscurrido = (fechaInicio: Date, fechaFin?: Date) => {
+    const ahora = fechaFin || new Date();
+    const diffMs = ahora.getTime() - fechaInicio.getTime();
+    const diffMinutos = Math.floor(diffMs / (1000 * 60));
+    
+    if (diffMinutos < 60) {
+      return `${diffMinutos} min`;
+    } else if (diffMinutos < 1440) {
+      const horas = Math.floor(diffMinutos / 60);
+      const minutos = diffMinutos % 60;
+      return `${horas}h ${minutos}min`;
+    } else {
+      const dias = Math.floor(diffMinutos / 1440);
+      const horas = Math.floor((diffMinutos % 1440) / 60);
+      return `${dias}d ${horas}h`;
+    }
+  };
 
   const filteredRequirements = useMemo(() => {
     if (!requirements || !Array.isArray(requirements)) {
@@ -40,15 +61,18 @@ const RequirementsList = () => {
         (requirement.pnrTktLocalizador && requirement.pnrTktLocalizador.toLowerCase().includes(searchTerm)) ||
         (requirement.correoElectronico && requirement.correoElectronico.toLowerCase().includes(searchTerm)) ||
         (requirement.tipoSolicitud && requirement.tipoSolicitud.toLowerCase().includes(searchTerm)) ||
-        (requirement.asuntoCorreoElectronico && requirement.asuntoCorreoElectronico.toLowerCase().includes(searchTerm));
+        (requirement.asuntoCorreoElectronico && requirement.asuntoCorreoElectronico.toLowerCase().includes(searchTerm)) ||
+        (requirement.motivo && requirement.motivo.toLowerCase().includes(searchTerm)) ||
+        (requirement.subMotivo && requirement.subMotivo.toLowerCase().includes(searchTerm));
       
       const matchesStatus = statusFilter === 'all' || requirement.status === statusFilter;
       const matchesPriority = priorityFilter === 'all' || requirement.priority === priorityFilter;
       const matchesOrigen = origenFilter === 'all' || requirement.origenConsulta === origenFilter;
+      const matchesTipo = tipoFilter === 'all' || requirement.tipoSolicitud === tipoFilter;
 
-      return matchesSearch && matchesStatus && matchesPriority && matchesOrigen;
+      return matchesSearch && matchesStatus && matchesPriority && matchesOrigen && matchesTipo;
     });
-  }, [requirements, search, statusFilter, priorityFilter, origenFilter]);
+  }, [requirements, search, statusFilter, priorityFilter, origenFilter, tipoFilter]);
 
   const exportToCSV = () => {
     if (!filteredRequirements || filteredRequirements.length === 0) {
@@ -57,30 +81,46 @@ const RequirementsList = () => {
     }
 
     const headers = [
-      'Ticket', 'Asesor', 'Origen', 'Soporte Inglés', 'Hora Ingreso',
-      'PNR/TKT/Localizador', 'Email', 'Tipo Solicitud', 'Motivo',
-      'Solicitud Cliente', 'Información Brindada', 'Observaciones',
-      'Estado', 'Prioridad', 'Asignado a', 'Equipo', 'Fecha'
+      'Número Único',
+      'Estado',
+      'País',
+      'Fecha Ingreso',
+      'Hora Ingreso Correo',
+      'Asunto',
+      'Origen',
+      'Tipo Claims',
+      'Motivo',
+      'Sub Motivo',
+      'Asignado a',
+      'Estado Final',
+      'Prioridad',
+      'PNR/TKT/Localizador',
+      'Solicitud Cliente',
+      'Información Brindada',
+      'Observaciones'
     ];
     
     const rows = filteredRequirements.map(req => [
       req.ticketNumber || '',
-      req.nombreAsesor || '',
+      req.status || '',
+      req.pais || '',
+      req.initialDate ? new Date(req.initialDate).toLocaleDateString('es-AR') : '',
+      calcularTiempoTranscurrido(
+        req.initialDate ? new Date(req.initialDate) : new Date(), 
+        req.resolvedAt ? new Date(req.resolvedAt) : undefined
+      ),
+      req.asuntoCorreoElectronico || '',
       req.origenConsulta || '',
-      req.esSoporteIngles ? 'Sí' : 'No',
-      req.horaIngresoCorreo || '',
-      req.pnrTktLocalizador || '',
-      req.correoElectronico || '',
       req.tipoSolicitud || '',
       req.motivo || '',
-      req.solicitudCliente || '',
-      req.informacionBrindada || '',
-      req.observaciones || '',
+      req.subMotivo || '',
+      req.nombreAsesor || '',
       req.status || '',
       req.priority || '',
-      req.assignedTo || '',
-      req.assignedTeam || '',
-      req.initialDate ? new Date(req.initialDate).toLocaleDateString('es-AR') : '',
+      req.pnrTktLocalizador || '',
+      req.solicitudCliente || '',
+      req.informacionBrindada || '',
+      req.observaciones || ''
     ]);
 
     const csvContent = [
@@ -160,7 +200,7 @@ const RequirementsList = () => {
           <CardTitle>Filtros</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -211,90 +251,133 @@ const RequirementsList = () => {
                 <SelectItem value="SABRE">SABRE</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={tipoFilter} onValueChange={(value) => setTipoFilter(value as 'Solicitudes' | 'Reclamos' | 'all')}>
+              <SelectTrigger>
+                <SelectValue placeholder="Tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los tipos</SelectItem>
+                <SelectItem value="Solicitudes">Solicitudes</SelectItem>
+                <SelectItem value="Reclamos">Reclamos</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
 
+      {/* Tabla de requerimientos */}
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Requerimientos ({filteredRequirements.length})</CardTitle>
+            <CardTitle>Tabla de Requerimientos</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Total: {requirements.length} | Filtrados: {filteredRequirements.length}
+              Mostrando {filteredRequirements.length} de {requirements.length} requerimientos
             </p>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {filteredRequirements.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  {requirements.length === 0 
-                    ? 'No hay requerimientos disponibles' 
-                    : 'No se encontraron requerimientos con los filtros aplicados'
-                  }
-                </p>
-                {requirements.length === 0 && (
-                  <Link to="/requirements/new">
-                    <Button className="mt-4">Crear Primer Requerimiento</Button>
-                  </Link>
-                )}
-              </div>
-            ) : (
-              filteredRequirements.map((requirement) => (
-                <Link
-                  key={requirement.id}
-                  to={`/requirements/${requirement.id}`}
-                  className="block p-4 rounded-lg border hover:bg-accent transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded">
-                          {requirement.ticketNumber || 'Sin ticket'}
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Número Único</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>País</TableHead>
+                  <TableHead>Fecha Ingreso</TableHead>
+                  <TableHead>Hora Ingreso Correo</TableHead>
+                  <TableHead>Asunto</TableHead>
+                  <TableHead>Origen</TableHead>
+                  <TableHead>Tipo Claims</TableHead>
+                  <TableHead>Motivo</TableHead>
+                  <TableHead>Sub Motivo</TableHead>
+                  <TableHead>Asignado a</TableHead>
+                  <TableHead>Estado Final</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredRequirements.map((requirement) => (
+                  <TableRow key={requirement.id}>
+                    <TableCell>
+                      <Link 
+                        to={`/requirements/${requirement.id}`}
+                        className="font-mono text-primary hover:underline"
+                      >
+                        {requirement.ticketNumber || 'Sin ticket'}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <RequirementStatusBadge status={requirement.status} />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3 text-muted-foreground" />
+                        <Badge variant="outline">{requirement.pais || 'N/A'}</Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {requirement.initialDate 
+                        ? new Date(requirement.initialDate).toLocaleDateString('es-AR')
+                        : 'Sin fecha'
+                      }
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-sm font-mono">
+                          {calcularTiempoTranscurrido(
+                            requirement.initialDate ? new Date(requirement.initialDate) : new Date(), 
+                            requirement.resolvedAt ? new Date(requirement.resolvedAt) : undefined
+                          )}
                         </span>
-                        <Badge variant="outline" className="text-xs">
-                          {requirement.origenConsulta || 'Sin origen'}
-                        </Badge>
-                        {requirement.esSoporteIngles && (
-                          <Badge variant="secondary" className="text-xs">EN</Badge>
-                        )}
                       </div>
-                      <h3 className="font-semibold mb-1">
-                        {requirement.tipoSolicitud || 'Requerimiento GDS'}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                        {requirement.solicitudCliente || 'Sin descripción'}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-2 text-sm">
-                        <RequirementStatusBadge status={requirement.status} />
-                        <RequirementPriorityBadge priority={requirement.priority} />
-                        <span className="text-muted-foreground">•</span>
-                        <span className="text-muted-foreground">
-                          PNR: {requirement.pnrTktLocalizador || 'N/A'}
-                        </span>
-                        <span className="text-muted-foreground">•</span>
-                        <span className="text-muted-foreground">
-                          Asesor: {requirement.nombreAsesor || 'N/A'}
-                        </span>
+                    </TableCell>
+                    <TableCell className="max-w-xs truncate">
+                      {requirement.asuntoCorreoElectronico || 'Sin asunto'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{requirement.origenConsulta || 'N/A'}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={requirement.tipoSolicitud === 'Reclamos' ? 'destructive' : 'default'}>
+                        {requirement.tipoSolicitud || 'N/A'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {requirement.motivo || 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      {requirement.subMotivo || 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        {requirement.nombreAsesor || 'N/A'}
                       </div>
-                    </div>
-                    <div className="text-right text-sm text-muted-foreground whitespace-nowrap">
-                      <div>
-                        {requirement.initialDate 
-                          ? new Date(requirement.initialDate).toLocaleDateString('es-AR')
-                          : 'Sin fecha'
-                        }
-                      </div>
-                      <div className="text-xs mt-1">
-                        {requirement.horaIngresoCorreo || 'Sin hora'}
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))
-            )}
+                    </TableCell>
+                    <TableCell>
+                      <RequirementStatusBadge status={requirement.status} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
+          
+          {filteredRequirements.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">
+                {requirements.length === 0 
+                  ? 'No hay requerimientos disponibles' 
+                  : 'No se encontraron requerimientos con los filtros aplicados'
+                }
+              </p>
+              {requirements.length === 0 && (
+                <Link to="/requirements/new">
+                  <Button className="mt-4">Crear Primer Requerimiento</Button>
+                </Link>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
