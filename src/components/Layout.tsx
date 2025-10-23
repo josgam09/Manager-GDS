@@ -79,8 +79,8 @@ const Layout = ({ children }: LayoutProps) => {
       <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-sidebar px-6 pb-4">
           <div className="flex h-16 shrink-0 items-center gap-2">
-            <Server className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-sidebar-foreground">Manager GDS</h1>
+            <Server className="h-8 w-8" style={{ color: 'hsl(var(--sidebar-logo))' }} />
+            <h1 className="text-2xl font-bold" style={{ color: 'hsl(var(--sidebar-logo))' }}>Manager GDS</h1>
           </div>
           <nav className="flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -224,8 +224,8 @@ const Layout = ({ children }: LayoutProps) => {
             </SheetContent>
           </Sheet>
           <div className="flex items-center gap-2">
-            <Server className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">Manager GDS</h1>
+            <Server className="h-6 w-6" style={{ color: 'hsl(var(--sidebar-logo))' }} />
+            <h1 className="text-xl font-bold" style={{ color: 'hsl(var(--sidebar-logo))' }}>Manager GDS</h1>
           </div>
         </div>
       </div>
