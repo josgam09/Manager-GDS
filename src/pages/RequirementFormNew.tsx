@@ -603,7 +603,7 @@ const RequirementFormNew = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>¿Cómo desea proceder con este caso? *</Label>
+              <Label>¿Puedes entregar la información requerida? *</Label>
               <RadioGroup value={casoOpcion} onValueChange={(value) => setCasoOpcion(value as CasoOpcion)}>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="SI_CERRAR_CASO" id="cerrar-caso" />
