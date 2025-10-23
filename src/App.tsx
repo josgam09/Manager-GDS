@@ -12,7 +12,7 @@ import Unauthorized from "@/pages/Unauthorized";
 import Dashboard from "@/pages/Dashboard";
 import RequirementsList from "@/pages/RequirementsList";
 import RequirementDetail from "@/pages/RequirementDetail";
-import RequirementForm from "@/pages/RequirementFormSimple";
+import RequirementForm from "@/pages/RequirementFormNew";
 import SupervisorInbox from "@/pages/SupervisorInbox";
 import AdminPanel from "@/pages/admin/AdminPanel";
 import UserManagement from "@/pages/admin/UserManagement";
