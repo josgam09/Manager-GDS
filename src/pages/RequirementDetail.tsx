@@ -82,21 +82,18 @@ const RequirementDetail = () => {
   };
 
   const handleAgencyResponse = () => {
-    if (!requirement || !user || !respuestaAgencia.trim()) {
-      toast.error('Por favor, ingresa la respuesta de la agencia');
-      return;
-    }
+    if (!requirement || !user) return;
 
     const newInteraction = {
       id: Date.now().toString(),
       fecha: new Date(),
       consulta: requirement.consultaAgencia || 'Consulta realizada a la agencia',
-      respuesta: respuestaAgencia.trim(),
+      respuesta: 'Respuesta recibida de la agencia',
       usuario: user.name,
     };
 
     const updates = {
-      respuestaAgencia: respuestaAgencia.trim(),
+      respuestaAgencia: 'Respuesta recibida de la agencia',
       historialInteraccionAgencia: [
         ...(requirement.historialInteraccionAgencia || []),
         newInteraction,
@@ -110,35 +107,30 @@ const RequirementDetail = () => {
           date: new Date(),
           action: 'Respuesta de agencia recibida',
           user: user.name,
-          comment: `Respuesta: ${respuestaAgencia.trim()}`,
+          comment: 'Se confirmó la recepción de respuesta de la agencia',
         },
       ],
     };
 
     updateRequirement(requirement.id, updates);
-    setRespuestaAgencia('');
-    setShowAgencyResponseForm(false);
     
-    toast.success('Respuesta de agencia registrada. Ahora puedes evaluar si tienes la información para resolver el caso.');
+    toast.success('Respuesta de agencia confirmada. Ahora puedes evaluar si tienes la información para resolver el caso.');
   };
 
   const handleOtherAreaResponse = () => {
-    if (!requirement || !user || !respuestaOtraArea.trim()) {
-      toast.error('Por favor, ingresa la respuesta de la otra área');
-      return;
-    }
+    if (!requirement || !user) return;
 
     const newInteraction = {
       id: Date.now().toString(),
       fecha: new Date(),
       consulta: requirement.consultaOtraArea || `Consulta realizada al área de ${requirement.areaEscalamiento}`,
-      respuesta: respuestaOtraArea.trim(),
+      respuesta: `Respuesta recibida de ${requirement.areaEscalamiento}`,
       usuario: user.name,
       area: requirement.areaEscalamiento || 'Área no especificada',
     };
 
     const updates = {
-      respuestaOtraArea: respuestaOtraArea.trim(),
+      respuestaOtraArea: `Respuesta recibida de ${requirement.areaEscalamiento}`,
       historialInteraccionOtraArea: [
         ...(requirement.historialInteraccionOtraArea || []),
         newInteraction,
@@ -152,16 +144,14 @@ const RequirementDetail = () => {
           date: new Date(),
           action: `Respuesta de ${requirement.areaEscalamiento} recibida`,
           user: user.name,
-          comment: `Respuesta: ${respuestaOtraArea.trim()}`,
+          comment: `Se confirmó la recepción de respuesta de ${requirement.areaEscalamiento}`,
         },
       ],
     };
 
     updateRequirement(requirement.id, updates);
-    setRespuestaOtraArea('');
-    setShowOtherAreaResponseForm(false);
     
-    toast.success(`Respuesta de ${requirement.areaEscalamiento} registrada. Ahora puedes evaluar si tienes la información para resolver el caso.`);
+    toast.success(`Respuesta de ${requirement.areaEscalamiento} confirmada. Ahora puedes evaluar si tienes la información para resolver el caso.`);
   };
 
   const handleRestartCaseManagement = () => {
@@ -464,41 +454,16 @@ const RequirementDetail = () => {
                     {/* Botón para actualizar respuesta */}
                     {!requirement.respuestaAgencia && user && ['ANALISTA', 'SUPERVISOR', 'ADMINISTRADOR'].includes(user.role) && (
                       <div className="space-y-3">
-                        {!showAgencyResponseForm ? (
-                          <Button 
-                            onClick={() => setShowAgencyResponseForm(true)} 
-                            className="gap-2"
-                          >
-                            <Send className="h-4 w-4" />
-                            Actualizar: Respuesta de Agencia Recibida
-                          </Button>
-                        ) : (
-                          <div className="space-y-3">
-                            <Label htmlFor="respuestaAgencia">Respuesta de la Agencia *</Label>
-                            <Textarea
-                              id="respuestaAgencia"
-                              value={respuestaAgencia}
-                              onChange={(e) => setRespuestaAgencia(e.target.value)}
-                              placeholder="Ingresa la respuesta recibida de la agencia..."
-                              rows={4}
-                            />
-                            <div className="flex gap-2">
-                              <Button onClick={handleAgencyResponse} disabled={!respuestaAgencia.trim()} className="gap-2">
-                                <Send className="h-4 w-4" />
-                                Registrar Respuesta
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                onClick={() => {
-                                  setShowAgencyResponseForm(false);
-                                  setRespuestaAgencia('');
-                                }}
-                              >
-                                Cancelar
-                              </Button>
-                            </div>
-                          </div>
-                        )}
+                        <Button 
+                          onClick={handleAgencyResponse} 
+                          className="gap-2"
+                        >
+                          <Send className="h-4 w-4" />
+                          Confirmar: Respuesta de Agencia Recibida
+                        </Button>
+                        <p className="text-xs text-muted-foreground">
+                          Al hacer click se marcará que recibiste la respuesta de la agencia.
+                        </p>
                       </div>
                     )}
 
@@ -635,41 +600,16 @@ const RequirementDetail = () => {
                     {/* Botón para actualizar respuesta */}
                     {!requirement.respuestaOtraArea && user && ['ANALISTA', 'SUPERVISOR', 'ADMINISTRADOR'].includes(user.role) && (
                       <div className="space-y-3">
-                        {!showOtherAreaResponseForm ? (
-                          <Button 
-                            onClick={() => setShowOtherAreaResponseForm(true)} 
-                            className="gap-2"
-                          >
-                            <Send className="h-4 w-4" />
-                            Actualizar: Respuesta de {requirement.areaEscalamiento} Recibida
-                          </Button>
-                        ) : (
-                          <div className="space-y-3">
-                            <Label htmlFor="respuestaOtraArea">Respuesta de {requirement.areaEscalamiento} *</Label>
-                            <Textarea
-                              id="respuestaOtraArea"
-                              value={respuestaOtraArea}
-                              onChange={(e) => setRespuestaOtraArea(e.target.value)}
-                              placeholder={`Ingresa la respuesta recibida de ${requirement.areaEscalamiento}...`}
-                              rows={4}
-                            />
-                            <div className="flex gap-2">
-                              <Button onClick={handleOtherAreaResponse} disabled={!respuestaOtraArea.trim()} className="gap-2">
-                                <Send className="h-4 w-4" />
-                                Registrar Respuesta
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                onClick={() => {
-                                  setShowOtherAreaResponseForm(false);
-                                  setRespuestaOtraArea('');
-                                }}
-                              >
-                                Cancelar
-                              </Button>
-                            </div>
-                          </div>
-                        )}
+                        <Button 
+                          onClick={handleOtherAreaResponse} 
+                          className="gap-2"
+                        >
+                          <Send className="h-4 w-4" />
+                          Confirmar: Respuesta de {requirement.areaEscalamiento} Recibida
+                        </Button>
+                        <p className="text-xs text-muted-foreground">
+                          Al hacer click se marcará que recibiste la respuesta de {requirement.areaEscalamiento}.
+                        </p>
                       </div>
                     )}
 
