@@ -301,35 +301,22 @@ const RequirementFormNew = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Número de Ticket */}
-        <Card className="border-primary/30 bg-primary/10">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-primary text-base">
-              <FileText className="h-4 w-4" />
-              Número de Ticket Asignado
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <Label htmlFor="ticketNumber" className="text-sm font-medium mb-1 block">
-                  Número Único del Requerimiento
-                </Label>
-                <div className="relative">
-                  <div className="bg-primary/5 border-primary/30 border rounded-md py-2 px-4 text-center">
-                    <span className="text-primary text-lg font-semibold tracking-wide">
-                      {ticketNumber}
-                    </span>
-                  </div>
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <FileText className="h-3 w-3 text-primary" />
+                <span className="text-sm font-medium text-primary">Ticket:</span>
+                <div className="bg-primary/10 border border-primary/20 rounded px-2 py-1">
+                  <span className="text-primary text-sm font-semibold tracking-wide">
+                    {ticketNumber}
+                  </span>
                 </div>
               </div>
-              <div className="text-xs text-muted-foreground max-w-xs">
-                <div className="bg-white/50 dark:bg-black/20 p-2 rounded-lg">
-                  <p className="font-medium text-primary mb-1">ℹ️ Información:</p>
-                  <p>Este número se genera automáticamente</p>
-                  <p className="text-xs mt-1 text-muted-foreground">
-                    Formato: GDS-AÑO-NÚMERO
-                  </p>
-                </div>
+              <div className="text-xs text-muted-foreground">
+                <span className="bg-white/50 dark:bg-black/20 px-2 py-1 rounded text-xs">
+                  Generado automáticamente
+                </span>
               </div>
             </div>
           </CardContent>
