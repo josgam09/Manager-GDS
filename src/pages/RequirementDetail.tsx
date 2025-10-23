@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import RequirementStatusBadge from '@/components/RequirementStatusBadge';
 import RequirementPriorityBadge from '@/components/RequirementPriorityBadge';
 import SupervisorActionPanel from '@/components/SupervisorActionPanel';
-import { ArrowLeft, Mail, Phone, User, Calendar, Clock, Server, Building2, Home, AlertTriangle, CheckCircle2, MessageSquareText, Send } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, User, Calendar, Clock, Server, Building2, Home, AlertTriangle, CheckCircle2, MessageSquareText, Send, PlayCircle, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
 
@@ -21,6 +21,12 @@ const RequirementDetail = () => {
   const { getRequirement, updateRequirement } = useRequirements();
   const [respuestaAgencia, setRespuestaAgencia] = useState('');
   const [showAgencyResponseForm, setShowAgencyResponseForm] = useState(false);
+  const [showCaseManagement, setShowCaseManagement] = useState(false);
+  const [caseManagementOption, setCaseManagementOption] = useState<'SI_CERRAR_CASO' | 'NO_ESCALAR_CASO' | 'NO_INTERACTUAR_AGENCIA' | ''>('');
+  const [escaladoA, setEscaladoA] = useState('');
+  const [areaEscalamiento, setAreaEscalamiento] = useState('');
+  const [analisisAnalista, setAnalisisAnalista] = useState('');
+  const [informacionBrindada, setInformacionBrindada] = useState('');
 
   const requirement = id ? getRequirement(id) : undefined;
   
@@ -138,6 +144,112 @@ const RequirementDetail = () => {
     toast.success('Flujo de gestión reiniciado. Ahora puedes evaluar nuevamente si tienes la información para resolver el caso.');
   };
 
+  const handleStartCaseManagement = () => {
+    if (!requirement || !user) return;
+    
+    // Cambiar estado a "en-gestion" para indicar que está siendo procesado
+    const updates = {
+      status: 'en-gestion',
+      updatedAt: new Date(),
+      history: [
+        ...requirement.history,
+        {
+          id: Date.now().toString(),
+          date: new Date(),
+          action: 'Iniciada gestión continua del caso',
+          user: user.name,
+          comment: 'El analista ha iniciado la gestión continua del caso desde el detalle',
+        },
+      ],
+    };
+
+    updateRequirement(requirement.id, updates);
+    setShowCaseManagement(true);
+    
+    toast.success('Gestión de caso iniciada. Evalúa si puedes resolver el caso con la información disponible.');
+  };
+
+  const handleCaseManagementSubmit = () => {
+    if (!requirement || !user) return;
+
+    // Validar según la opción seleccionada
+    if (caseManagementOption === 'SI_CERRAR_CASO') {
+      if (!informacionBrindada.trim()) {
+        toast.error('Por favor proporciona la información brindada al cliente antes de cerrar el caso');
+        return;
+      }
+    }
+
+    if (caseManagementOption === 'NO_ESCALAR_CASO') {
+      if (!escaladoA) {
+        toast.error('Por favor selecciona a quién escalar el caso');
+        return;
+      }
+      if (escaladoA === 'SUPERVISOR' && !analisisAnalista.trim()) {
+        toast.error('Por favor proporciona tu análisis y motivo del escalamiento al supervisor');
+        return;
+      }
+      if (escaladoA === 'OTRA_AREA' && !areaEscalamiento) {
+        toast.error('Por favor selecciona el área a escalar');
+        return;
+      }
+    }
+
+    // Determinar el estado según la opción seleccionada
+    let nuevoEstado: any = 'nuevo';
+    
+    if (caseManagementOption === 'SI_CERRAR_CASO') {
+      nuevoEstado = 'cerrado';
+    } else if (caseManagementOption === 'NO_ESCALAR_CASO') {
+      if (escaladoA === 'SUPERVISOR') {
+        nuevoEstado = 'pendiente-supervisor';
+      } else if (escaladoA === 'OTRA_AREA') {
+        nuevoEstado = 'pendiente-otra-area';
+      }
+    } else if (caseManagementOption === 'NO_INTERACTUAR_AGENCIA') {
+      nuevoEstado = 'pendiente-agencia';
+    }
+
+    const updates = {
+      casoOpcion: caseManagementOption,
+      escaladoA: caseManagementOption === 'NO_ESCALAR_CASO' ? escaladoA : undefined,
+      areaEscalamiento: escaladoA === 'OTRA_AREA' ? areaEscalamiento : undefined,
+      analisisAnalista: escaladoA === 'SUPERVISOR' ? analisisAnalista : undefined,
+      informacionBrindada: caseManagementOption === 'SI_CERRAR_CASO' ? informacionBrindada : requirement.informacionBrindada,
+      status: nuevoEstado,
+      updatedAt: new Date(),
+      resolvedAt: caseManagementOption === 'SI_CERRAR_CASO' ? new Date() : undefined,
+      history: [
+        ...requirement.history,
+        {
+          id: Date.now().toString(),
+          date: new Date(),
+          action: `Gestión de caso completada - ${caseManagementOption === 'SI_CERRAR_CASO' ? 'Caso cerrado' : caseManagementOption === 'NO_ESCALAR_CASO' ? 'Caso escalado' : 'Caso marcado para interacción con agencia'}`,
+          user: user.name,
+          comment: `Opción seleccionada: ${caseManagementOption}`,
+        },
+      ],
+    };
+
+    updateRequirement(requirement.id, updates);
+    
+    // Resetear estados
+    setShowCaseManagement(false);
+    setCaseManagementOption('');
+    setEscaladoA('');
+    setAreaEscalamiento('');
+    setAnalisisAnalista('');
+    setInformacionBrindada('');
+    
+    const actionText = caseManagementOption === 'SI_CERRAR_CASO' 
+      ? 'caso cerrado exitosamente' 
+      : caseManagementOption === 'NO_ESCALAR_CASO'
+      ? 'caso escalado exitosamente'
+      : 'caso marcado para interacción con agencia';
+    
+    toast.success(`Gestión completada: ${actionText}`);
+  };
+
   if (!requirement) {
     return (
       <div className="space-y-6">
@@ -176,7 +288,7 @@ const RequirementDetail = () => {
             Volver a Requerimientos
           </Button>
         </div>
-        {user && ['ADMINISTRADOR', 'ANALISTA', 'SUPERVISOR'].includes(user.role) && (
+        {user && ['ADMINISTRADOR', 'SUPERVISOR'].includes(user.role) && (
           <Link to={`/requirements/${requirement.id}/edit`}>
             <Button>Editar Requerimiento</Button>
           </Link>
@@ -491,6 +603,202 @@ const RequirementDetail = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Gestión Continua de Casos - Solo para Analistas */}
+          {user && user.role === 'ANALISTA' && (
+            <Card className="border-2 border-blue-500/50 bg-blue-50/10 dark:bg-blue-950/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                  <PlayCircle className="h-5 w-5" />
+                  Gestión Continua del Caso
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* Estados que permiten gestión continua */}
+                {['nuevo', 'en-gestion', 'respuesta-agencia'].includes(requirement.status) && !showCaseManagement && (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Puedes continuar la gestión de este caso directamente desde aquí.
+                    </p>
+                    <Button 
+                      onClick={handleStartCaseManagement}
+                      className="gap-2 bg-blue-600 hover:bg-blue-700"
+                    >
+                      <PlayCircle className="h-4 w-4" />
+                      Iniciar Gestión del Caso
+                    </Button>
+                  </div>
+                )}
+
+                {/* Formulario de gestión de casos */}
+                {showCaseManagement && (
+                  <div className="space-y-4">
+                    <div className="p-3 bg-white dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+                      <p className="text-sm font-semibold mb-2">¿Puedes entregar la información requerida?</p>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Evalúa si tienes toda la información necesaria para resolver este caso.
+                      </p>
+                      
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id="si_cerrar_caso"
+                            name="caseManagementOption"
+                            value="SI_CERRAR_CASO"
+                            checked={caseManagementOption === 'SI_CERRAR_CASO'}
+                            onChange={(e) => setCaseManagementOption(e.target.value as any)}
+                            className="h-4 w-4"
+                          />
+                          <Label htmlFor="si_cerrar_caso" className="text-sm font-medium">
+                            Sí y Cerrar Caso
+                          </Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id="no_escalar_caso"
+                            name="caseManagementOption"
+                            value="NO_ESCALAR_CASO"
+                            checked={caseManagementOption === 'NO_ESCALAR_CASO'}
+                            onChange={(e) => setCaseManagementOption(e.target.value as any)}
+                            className="h-4 w-4"
+                          />
+                          <Label htmlFor="no_escalar_caso" className="text-sm font-medium">
+                            No y Escalar Caso
+                          </Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id="no_interactuar_agencia"
+                            name="caseManagementOption"
+                            value="NO_INTERACTUAR_AGENCIA"
+                            checked={caseManagementOption === 'NO_INTERACTUAR_AGENCIA'}
+                            onChange={(e) => setCaseManagementOption(e.target.value as any)}
+                            className="h-4 w-4"
+                          />
+                          <Label htmlFor="no_interactuar_agencia" className="text-sm font-medium">
+                            No y Interactuar con Agencia
+                          </Label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Campos condicionales según la opción seleccionada */}
+                    {caseManagementOption === 'SI_CERRAR_CASO' && (
+                      <div className="space-y-3">
+                        <div className="space-y-2">
+                          <Label htmlFor="informacionBrindada">Información Brindada al Cliente *</Label>
+                          <Textarea
+                            id="informacionBrindada"
+                            value={informacionBrindada}
+                            onChange={(e) => setInformacionBrindada(e.target.value)}
+                            placeholder="Describe la información que proporcionaste al cliente..."
+                            rows={4}
+                            required
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {caseManagementOption === 'NO_ESCALAR_CASO' && (
+                      <div className="space-y-3">
+                        <div className="space-y-2">
+                          <Label htmlFor="escaladoA">Escalar a *</Label>
+                          <select
+                            id="escaladoA"
+                            value={escaladoA}
+                            onChange={(e) => setEscaladoA(e.target.value)}
+                            className="w-full p-2 border rounded-md"
+                            required
+                          >
+                            <option value="">Selecciona una opción</option>
+                            <option value="SUPERVISOR">Supervisor</option>
+                            <option value="OTRA_AREA">Otra Área</option>
+                          </select>
+                        </div>
+
+                        {escaladoA === 'SUPERVISOR' && (
+                          <div className="space-y-2">
+                            <Label htmlFor="analisisAnalista">Análisis y Motivo del Escalamiento *</Label>
+                            <Textarea
+                              id="analisisAnalista"
+                              value={analisisAnalista}
+                              onChange={(e) => setAnalisisAnalista(e.target.value)}
+                              placeholder="Explica por qué necesitas escalar este caso al supervisor..."
+                              rows={3}
+                              required
+                            />
+                          </div>
+                        )}
+
+                        {escaladoA === 'OTRA_AREA' && (
+                          <div className="space-y-2">
+                            <Label htmlFor="areaEscalamiento">Área a Escalar *</Label>
+                            <select
+                              id="areaEscalamiento"
+                              value={areaEscalamiento}
+                              onChange={(e) => setAreaEscalamiento(e.target.value)}
+                              className="w-full p-2 border rounded-md"
+                              required
+                            >
+                              <option value="">Selecciona un área</option>
+                              <option value="Cobros Ato">Cobros Ato</option>
+                              <option value="Sobreventa">Sobreventa</option>
+                              <option value="Medios de pago">Medios de pago</option>
+                              <option value="Facturación">Facturación</option>
+                              <option value="Finanzas">Finanzas</option>
+                              <option value="Área Comercial">Área Comercial</option>
+                              <option value="Ventas">Ventas</option>
+                              <option value="Área legal">Área legal</option>
+                              <option value="Distribución">Distribución</option>
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Botones de acción */}
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={handleCaseManagementSubmit}
+                        className="gap-2"
+                        disabled={!caseManagementOption}
+                      >
+                        {caseManagementOption === 'SI_CERRAR_CASO' ? (
+                          <>
+                            <CheckCircle2 className="h-4 w-4" />
+                            Cerrar Caso
+                          </>
+                        ) : (
+                          <>
+                            <RotateCcw className="h-4 w-4" />
+                            Actualizar Estado
+                          </>
+                        )}
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          setShowCaseManagement(false);
+                          setCaseManagementOption('');
+                          setEscaladoA('');
+                          setAreaEscalamiento('');
+                          setAnalisisAnalista('');
+                          setInformacionBrindada('');
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Panel de Acción del Supervisor */}
           {user && ['SUPERVISOR', 'ADMINISTRADOR'].includes(user.role) && 
