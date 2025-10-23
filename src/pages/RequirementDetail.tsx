@@ -20,6 +20,7 @@ const RequirementDetail = () => {
   const { user } = useAuth();
   const { getRequirement, updateRequirement } = useRequirements();
   const [respuestaAgencia, setRespuestaAgencia] = useState('');
+  const [showAgencyResponseForm, setShowAgencyResponseForm] = useState(false);
 
   const requirement = id ? getRequirement(id) : undefined;
   
@@ -81,7 +82,7 @@ const RequirementDetail = () => {
     const newInteraction = {
       id: Date.now().toString(),
       fecha: new Date(),
-      consulta: requirement.consultaAgencia || '',
+      consulta: requirement.consultaAgencia || 'Consulta realizada a la agencia',
       respuesta: respuestaAgencia.trim(),
       usuario: user.name,
     };
@@ -108,8 +109,33 @@ const RequirementDetail = () => {
 
     updateRequirement(requirement.id, updates);
     setRespuestaAgencia('');
+    setShowAgencyResponseForm(false);
     
     toast.success('Respuesta de agencia registrada. Ahora puedes evaluar si tienes la información para resolver el caso.');
+  };
+
+  const handleRestartCaseManagement = () => {
+    if (!requirement || !user) return;
+
+    const updates = {
+      casoOpcion: 'SI_CERRAR_CASO', // Reiniciar a la opción de cerrar caso
+      status: 'nuevo', // Volver a estado nuevo para nueva evaluación
+      updatedAt: new Date(),
+      history: [
+        ...requirement.history,
+        {
+          id: Date.now().toString(),
+          date: new Date(),
+          action: 'Flujo de gestión reiniciado - Nueva evaluación',
+          user: user.name,
+          comment: 'El caso ha sido reiniciado para nueva evaluación después de recibir respuesta de agencia',
+        },
+      ],
+    };
+
+    updateRequirement(requirement.id, updates);
+    
+    toast.success('Flujo de gestión reiniciado. Ahora puedes evaluar nuevamente si tienes la información para resolver el caso.');
   };
 
   if (!requirement) {
@@ -262,15 +288,7 @@ const RequirementDetail = () => {
                       Interacción con Agencia
                     </h3>
                     
-                    {/* Consulta a la Agencia */}
-                    {requirement.consultaAgencia && (
-                      <div className="mb-4 p-3 bg-white dark:bg-orange-900/20 rounded border border-orange-200 dark:border-orange-800">
-                        <p className="text-sm font-semibold mb-2">📤 Consulta realizada a la agencia:</p>
-                        <p className="whitespace-pre-wrap text-sm">{requirement.consultaAgencia}</p>
-                      </div>
-                    )}
-
-                    {/* Respuesta de la Agencia */}
+                    {/* Estado actual */}
                     {requirement.respuestaAgencia ? (
                       <div className="mb-4 p-3 bg-white dark:bg-orange-900/20 rounded border border-orange-200 dark:border-orange-800">
                         <p className="text-sm font-semibold mb-2">📥 Respuesta de la agencia:</p>
@@ -287,20 +305,62 @@ const RequirementDetail = () => {
                       </div>
                     )}
 
-                    {/* Formulario para agregar respuesta de agencia */}
+                    {/* Botón para actualizar respuesta */}
                     {!requirement.respuestaAgencia && user && ['ANALISTA', 'SUPERVISOR', 'ADMINISTRADOR'].includes(user.role) && (
                       <div className="space-y-3">
-                        <Label htmlFor="respuestaAgencia">Respuesta de la Agencia *</Label>
-                        <Textarea
-                          id="respuestaAgencia"
-                          value={respuestaAgencia}
-                          onChange={(e) => setRespuestaAgencia(e.target.value)}
-                          placeholder="Ingresa la respuesta recibida de la agencia..."
-                          rows={4}
-                        />
-                        <Button onClick={handleAgencyResponse} disabled={!respuestaAgencia.trim()} className="gap-2">
-                          <Send className="h-4 w-4" />
-                          Registrar Respuesta de Agencia
+                        {!showAgencyResponseForm ? (
+                          <Button 
+                            onClick={() => setShowAgencyResponseForm(true)} 
+                            className="gap-2"
+                          >
+                            <Send className="h-4 w-4" />
+                            Actualizar: Respuesta de Agencia Recibida
+                          </Button>
+                        ) : (
+                          <div className="space-y-3">
+                            <Label htmlFor="respuestaAgencia">Respuesta de la Agencia *</Label>
+                            <Textarea
+                              id="respuestaAgencia"
+                              value={respuestaAgencia}
+                              onChange={(e) => setRespuestaAgencia(e.target.value)}
+                              placeholder="Ingresa la respuesta recibida de la agencia..."
+                              rows={4}
+                            />
+                            <div className="flex gap-2">
+                              <Button onClick={handleAgencyResponse} disabled={!respuestaAgencia.trim()} className="gap-2">
+                                <Send className="h-4 w-4" />
+                                Registrar Respuesta
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                onClick={() => {
+                                  setShowAgencyResponseForm(false);
+                                  setRespuestaAgencia('');
+                                }}
+                              >
+                                Cancelar
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Botón para reiniciar gestión después de recibir respuesta */}
+                    {requirement.respuestaAgencia && user && ['ANALISTA', 'SUPERVISOR', 'ADMINISTRADOR'].includes(user.role) && (
+                      <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-800">
+                        <p className="text-sm font-semibold mb-2 text-green-700 dark:text-green-400">
+                          ✅ Respuesta recibida - ¿Puedes resolver el caso ahora?
+                        </p>
+                        <p className="text-xs text-muted-foreground mb-3">
+                          Con la información de la agencia, evalúa si puedes proporcionar la solución al cliente.
+                        </p>
+                        <Button 
+                          onClick={handleRestartCaseManagement}
+                          className="gap-2 bg-green-600 hover:bg-green-700"
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                          Reiniciar Evaluación de Caso
                         </Button>
                       </div>
                     )}

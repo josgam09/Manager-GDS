@@ -62,8 +62,6 @@ const RequirementFormNew = () => {
   const [escaladoA, setEscaladoA] = useState('');
   const [areaEscalamiento, setAreaEscalamiento] = useState<AreaEscalamiento | ''>('');
   const [analisisAnalista, setAnalisisAnalista] = useState('');
-  const [consultaAgencia, setConsultaAgencia] = useState('');
-  const [respuestaAgencia, setRespuestaAgencia] = useState('');
   const [informacionBrindada, setInformacionBrindada] = useState('');
   const [observaciones, setObservaciones] = useState('');
   const [availableScripts, setAvailableScripts] = useState<ResponseScript[]>([]);
@@ -236,12 +234,6 @@ const RequirementFormNew = () => {
       }
     }
 
-    if (casoOpcion === 'NO_INTERACTUAR_AGENCIA') {
-      if (!consultaAgencia.trim()) {
-        toast.error('Por favor describe la consulta a realizar a la agencia');
-        return;
-      }
-    }
 
     // Determinar el estado según la opción seleccionada
     let estadoInicial: any = 'nuevo';
@@ -277,8 +269,6 @@ const RequirementFormNew = () => {
       escaladoA: casoOpcion === 'NO_ESCALAR_CASO' ? escaladoA as any : undefined,
       areaEscalamiento: escaladoA === 'OTRA_AREA' ? areaEscalamiento as AreaEscalamiento : undefined,
       analisisAnalista: escaladoA === 'SUPERVISOR' ? analisisAnalista : undefined,
-      consultaAgencia: casoOpcion === 'NO_INTERACTUAR_AGENCIA' ? consultaAgencia : undefined,
-      respuestaAgencia: casoOpcion === 'NO_INTERACTUAR_AGENCIA' ? respuestaAgencia : undefined,
       informacionBrindada,
       observaciones,
       status: estadoInicial,
@@ -293,7 +283,7 @@ const RequirementFormNew = () => {
       ? 'creado y cerrado exitosamente' 
       : casoOpcion === 'NO_ESCALAR_CASO'
       ? 'creado y escalado exitosamente'
-      : 'creado y enviado para interacción con agencia';
+      : 'creado y marcado para interacción con agencia';
     
     toast.success(`Requerimiento ${actionText}`);
     navigate('/requirements');
@@ -671,32 +661,6 @@ const RequirementFormNew = () => {
               </div>
             )}
 
-            {/* Opción: Interactuar con Agencia */}
-            {casoOpcion === 'NO_INTERACTUAR_AGENCIA' && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="consultaAgencia">Consulta a realizar a la Agencia *</Label>
-                  <Textarea
-                    id="consultaAgencia"
-                    value={consultaAgencia}
-                    onChange={(e) => setConsultaAgencia(e.target.value)}
-                    placeholder="Describe la consulta específica que necesitas realizar a la agencia..."
-                    rows={4}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="respuestaAgencia">Respuesta de la Agencia</Label>
-                  <Textarea
-                    id="respuestaAgencia"
-                    value={respuestaAgencia}
-                    onChange={(e) => setRespuestaAgencia(e.target.value)}
-                    placeholder="Registra aquí la respuesta recibida de la agencia..."
-                    rows={3}
-                  />
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
 
