@@ -5,17 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import RequirementStatusBadge from '@/components/RequirementStatusBadge';
 import RequirementPriorityBadge from '@/components/RequirementPriorityBadge';
 import SupervisorActionPanel from '@/components/SupervisorActionPanel';
-import { ArrowLeft, Mail, Phone, User, Calendar, Clock, Server, Building2, Home, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, User, Calendar, Clock, Server, Building2, Home, AlertTriangle, CheckCircle2, MessageSquareText, Send } from 'lucide-react';
 import { toast } from 'sonner';
+import { useState } from 'react';
 
 const RequirementDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { getRequirement, updateRequirement } = useRequirements();
+  const [respuestaAgencia, setRespuestaAgencia] = useState('');
 
   const requirement = id ? getRequirement(id) : undefined;
   
@@ -66,6 +70,46 @@ const RequirementDetail = () => {
     if (action === 'resolver_directo') {
       setTimeout(() => navigate('/supervisor/inbox'), 2000);
     }
+  };
+
+  const handleAgencyResponse = () => {
+    if (!requirement || !user || !respuestaAgencia.trim()) {
+      toast.error('Por favor, ingresa la respuesta de la agencia');
+      return;
+    }
+
+    const newInteraction = {
+      id: Date.now().toString(),
+      fecha: new Date(),
+      consulta: requirement.consultaAgencia || '',
+      respuesta: respuestaAgencia.trim(),
+      usuario: user.name,
+    };
+
+    const updates = {
+      respuestaAgencia: respuestaAgencia.trim(),
+      historialInteraccionAgencia: [
+        ...(requirement.historialInteraccionAgencia || []),
+        newInteraction,
+      ],
+      status: 'respuesta-agencia',
+      updatedAt: new Date(),
+      history: [
+        ...requirement.history,
+        {
+          id: Date.now().toString(),
+          date: new Date(),
+          action: 'Respuesta de agencia recibida',
+          user: user.name,
+          comment: `Respuesta: ${respuestaAgencia.trim()}`,
+        },
+      ],
+    };
+
+    updateRequirement(requirement.id, updates);
+    setRespuestaAgencia('');
+    
+    toast.success('Respuesta de agencia registrada. Ahora puedes evaluar si tienes la información para resolver el caso.');
   };
 
   if (!requirement) {
@@ -131,7 +175,7 @@ const RequirementDetail = () => {
                     )}
                   </div>
                   <CardTitle className="text-2xl">
-                    {requirement.tipoSolicitud || requirement.reclamoIncidente || 'Requerimiento GDS'}
+                    {requirement.tipoSolicitud || 'Requerimiento GDS'}
                   </CardTitle>
                   <div className="flex flex-wrap items-center gap-2">
                     <RequirementStatusBadge status={requirement.status} />
@@ -147,8 +191,8 @@ const RequirementDetail = () => {
                   <p className="text-muted-foreground font-mono">{requirement.pnrTktLocalizador}</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-2">Canal de Consulta</h3>
-                  <p className="text-muted-foreground">{requirement.canalConsulta}</p>
+                  <h3 className="font-semibold mb-2">País</h3>
+                  <p className="text-muted-foreground">{requirement.pais}</p>
                 </div>
               </div>
 
@@ -162,12 +206,32 @@ const RequirementDetail = () => {
                 </>
               )}
 
-              {requirement.reclamoIncidente && (
+              {requirement.motivo && (
                 <>
                   <Separator />
                   <div>
-                    <h3 className="font-semibold mb-2">Reclamo / Incidente</h3>
-                    <p className="text-muted-foreground">{requirement.reclamoIncidente}</p>
+                    <h3 className="font-semibold mb-2">Motivo</h3>
+                    <p className="text-muted-foreground">{requirement.motivo}</p>
+                  </div>
+                </>
+              )}
+
+              {requirement.subMotivo && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="font-semibold mb-2">Sub Motivo</h3>
+                    <p className="text-muted-foreground">{requirement.subMotivo}</p>
+                  </div>
+                </>
+              )}
+
+              {requirement.asuntoCorreoElectronico && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="font-semibold mb-2">Asunto del Correo</h3>
+                    <p className="text-muted-foreground">{requirement.asuntoCorreoElectronico}</p>
                   </div>
                 </>
               )}
@@ -184,6 +248,98 @@ const RequirementDetail = () => {
                   <div>
                     <h3 className="font-semibold mb-2">Información Brindada</h3>
                     <p className="text-muted-foreground whitespace-pre-wrap">{requirement.informacionBrindada}</p>
+                  </div>
+                </>
+              )}
+
+              {/* Sección de Interacción con Agencia */}
+              {requirement.casoOpcion === 'NO_INTERACTUAR_AGENCIA' && (
+                <>
+                  <Separator />
+                  <div className="p-4 bg-orange-50 dark:bg-orange-950/30 rounded-lg border-2 border-orange-500/50">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2 text-orange-700 dark:text-orange-400">
+                      <MessageSquareText className="h-5 w-5" />
+                      Interacción con Agencia
+                    </h3>
+                    
+                    {/* Consulta a la Agencia */}
+                    {requirement.consultaAgencia && (
+                      <div className="mb-4 p-3 bg-white dark:bg-orange-900/20 rounded border border-orange-200 dark:border-orange-800">
+                        <p className="text-sm font-semibold mb-2">📤 Consulta realizada a la agencia:</p>
+                        <p className="whitespace-pre-wrap text-sm">{requirement.consultaAgencia}</p>
+                      </div>
+                    )}
+
+                    {/* Respuesta de la Agencia */}
+                    {requirement.respuestaAgencia ? (
+                      <div className="mb-4 p-3 bg-white dark:bg-orange-900/20 rounded border border-orange-200 dark:border-orange-800">
+                        <p className="text-sm font-semibold mb-2">📥 Respuesta de la agencia:</p>
+                        <p className="whitespace-pre-wrap text-sm">{requirement.respuestaAgencia}</p>
+                      </div>
+                    ) : (
+                      <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800">
+                        <p className="text-sm font-semibold mb-2 text-yellow-700 dark:text-yellow-400">
+                          ⏳ Pendiente de respuesta de la agencia
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Una vez que recibas la respuesta, podrás evaluar si tienes la información necesaria para resolver el caso.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Formulario para agregar respuesta de agencia */}
+                    {!requirement.respuestaAgencia && user && ['ANALISTA', 'SUPERVISOR', 'ADMINISTRADOR'].includes(user.role) && (
+                      <div className="space-y-3">
+                        <Label htmlFor="respuestaAgencia">Respuesta de la Agencia *</Label>
+                        <Textarea
+                          id="respuestaAgencia"
+                          value={respuestaAgencia}
+                          onChange={(e) => setRespuestaAgencia(e.target.value)}
+                          placeholder="Ingresa la respuesta recibida de la agencia..."
+                          rows={4}
+                        />
+                        <Button onClick={handleAgencyResponse} disabled={!respuestaAgencia.trim()} className="gap-2">
+                          <Send className="h-4 w-4" />
+                          Registrar Respuesta de Agencia
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Historial de Interacciones */}
+                    {requirement.historialInteraccionAgencia && requirement.historialInteraccionAgencia.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-sm font-semibold mb-2">📋 Historial de Interacciones ({requirement.historialInteraccionAgencia.length}):</p>
+                        <div className="space-y-2">
+                          {requirement.historialInteraccionAgencia.map((interaction, index) => (
+                            <div key={interaction.id} className="p-2 bg-gray-50 dark:bg-gray-900/30 rounded text-xs">
+                              <div className="flex justify-between items-start mb-1">
+                                <span className="font-semibold">Interacción #{index + 1}</span>
+                                <span className="text-muted-foreground">
+                                  {new Date(interaction.fecha).toLocaleString('es-AR')}
+                                </span>
+                              </div>
+                              <div className="space-y-1">
+                                <div>
+                                  <span className="font-medium">Consulta:</span>
+                                  <p className="text-muted-foreground">{interaction.consulta}</p>
+                                </div>
+                                <div>
+                                  <span className="font-medium">Respuesta:</span>
+                                  <p className="text-muted-foreground">{interaction.respuesta}</p>
+                                </div>
+                                <div className="text-muted-foreground">
+                                  Registrado por: {interaction.usuario}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <Badge variant="outline" className="bg-orange-100 dark:bg-orange-900/30">
+                      {requirement.respuestaAgencia ? '✅ Respuesta recibida' : '⏳ Esperando respuesta'}
+                    </Badge>
                   </div>
                 </>
               )}
@@ -234,7 +390,7 @@ const RequirementDetail = () => {
               )}
 
               {/* Información de Escalamiento */}
-              {!requirement.puedeEntregarInformacion && (
+              {requirement.casoOpcion === 'NO_ESCALAR_CASO' && (
                 <>
                   <Separator />
                   <div className="p-4 bg-warning/10 rounded-lg border border-warning/20">
@@ -249,7 +405,7 @@ const RequirementDetail = () => {
                       <p>
                         <strong>Escalado a:</strong>{' '}
                         <Badge variant={requirement.escaladoA === 'SUPERVISOR' ? 'default' : 'secondary'}>
-                          {requirement.escaladoA === 'SUPERVISOR' ? 'SUPERVISOR' : `OTRA ÁREA: ${requirement.nombreAreaEscalamiento}`}
+                          {requirement.escaladoA === 'SUPERVISOR' ? 'SUPERVISOR' : `OTRA ÁREA: ${requirement.areaEscalamiento}`}
                         </Badge>
                       </p>
                       
@@ -267,7 +423,7 @@ const RequirementDetail = () => {
                       )}
                       
                       <p className="text-muted-foreground italic">
-                        Este caso requiere atención de {requirement.escaladoA === 'SUPERVISOR' ? 'un supervisor' : `el área de ${requirement.nombreAreaEscalamiento}`}
+                        Este caso requiere atención de {requirement.escaladoA === 'SUPERVISOR' ? 'un supervisor' : `el área de ${requirement.areaEscalamiento}`}
                       </p>
                     </div>
                   </div>

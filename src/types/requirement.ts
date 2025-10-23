@@ -5,6 +5,8 @@ export type RequirementStatus =
   | 'pendiente-supervisor' 
   | 'respuesta-supervisor'
   | 'pendiente-otra-area' 
+  | 'pendiente-agencia'
+  | 'respuesta-agencia'
   | 'resuelto' 
   | 'cerrado';
 export type RequirementPriority = 'baja' | 'media' | 'alta' | 'critica';
@@ -280,9 +282,11 @@ export interface Requirement {
   consultaAgencia?: string; // Consulta realizada a la agencia
   respuestaAgencia?: string; // Respuesta recibida de la agencia
   historialInteraccionAgencia?: Array<{
+    id: string;
     fecha: Date;
     consulta: string;
-    respuesta?: string;
+    respuesta: string;
+    usuario: string;
   }>;
   
   informacionBrindada: string; // Texto largo
