@@ -206,6 +206,34 @@ export type UserRole = 'ANALISTA' | 'SUPERVISOR' | 'ADMINISTRADOR';
 // Opciones de Escalamiento
 export type EscalationOption = 'SUPERVISOR' | 'OTRA_AREA';
 
+// Nuevas opciones de gestión de casos
+export type CasoOpcion = 'SI_CERRAR_CASO' | 'NO_ESCALAR_CASO' | 'NO_INTERACTUAR_AGENCIA';
+
+// Áreas específicas para escalamiento
+export type AreaEscalamiento = 
+  | 'Cobros Ato'
+  | 'Sobreventa'
+  | 'Medios de pago'
+  | 'Facturación'
+  | 'Finanzas'
+  | 'Área Comercial'
+  | 'Ventas'
+  | 'Área legal'
+  | 'Distribución';
+
+// Estados adicionales para interacción con agencia
+export type RequirementStatus = 
+  | 'nuevo' 
+  | 'en-proceso' 
+  | 'pendiente-informacion' 
+  | 'pendiente-supervisor' 
+  | 'respuesta-supervisor'
+  | 'pendiente-otra-area' 
+  | 'pendiente-agencia'
+  | 'respuesta-agencia'
+  | 'resuelto' 
+  | 'cerrado';
+
 // Acciones del Supervisor
 export type SupervisorAction = 'autorizar_analista' | 'resolver_directo' | null;
 
@@ -235,10 +263,10 @@ export interface Requirement {
   
   solicitudCliente: string; // Texto largo
   
-  // Control de escalamiento
-  puedeEntregarInformacion: boolean; // Si/No - Nueva pregunta
+  // Control de gestión de casos (Nueva estructura)
+  casoOpcion: CasoOpcion; // Nueva opción principal
   escaladoA?: EscalationOption; // SUPERVISOR | OTRA_AREA
-  nombreAreaEscalamiento?: string; // Nombre del área si es OTRA_AREA
+  areaEscalamiento?: AreaEscalamiento; // Área específica si es OTRA_AREA
   
   // Análisis del Analista (obligatorio cuando escala a supervisor)
   analisisAnalista?: string; // Resumen y motivo del escalamiento al supervisor
@@ -247,6 +275,15 @@ export interface Requirement {
   respuestaSupervisor?: string; // Respuesta/instrucciones del supervisor al analista
   accionSupervisor?: SupervisorAction; // Qué decidió hacer el supervisor
   supervisorResolvio?: boolean; // Si el supervisor resolvió directamente el caso
+  
+  // Interacción con Agencia
+  consultaAgencia?: string; // Consulta realizada a la agencia
+  respuestaAgencia?: string; // Respuesta recibida de la agencia
+  historialInteraccionAgencia?: Array<{
+    fecha: Date;
+    consulta: string;
+    respuesta?: string;
+  }>;
   
   informacionBrindada: string; // Texto largo
   observaciones: string; // Texto largo

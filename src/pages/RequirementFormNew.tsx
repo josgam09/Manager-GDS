@@ -18,7 +18,9 @@ import {
   OrigenConsulta, 
   TipoSolicitud,
   MotivoSolicitud,
-  MotivoReclamo
+  MotivoReclamo,
+  CasoOpcion,
+  AreaEscalamiento
 } from '@/types/requirement';
 
 const RequirementFormNew = () => {
@@ -56,10 +58,12 @@ const RequirementFormNew = () => {
 
   // Campos adicionales
   const [solicitudCliente, setSolicitudCliente] = useState('');
-  const [puedeEntregarInformacion, setPuedeEntregarInformacion] = useState('Si');
+  const [casoOpcion, setCasoOpcion] = useState<CasoOpcion>('SI_CERRAR_CASO');
   const [escaladoA, setEscaladoA] = useState('');
-  const [nombreAreaEscalamiento, setNombreAreaEscalamiento] = useState('');
+  const [areaEscalamiento, setAreaEscalamiento] = useState<AreaEscalamiento | ''>('');
   const [analisisAnalista, setAnalisisAnalista] = useState('');
+  const [consultaAgencia, setConsultaAgencia] = useState('');
+  const [respuestaAgencia, setRespuestaAgencia] = useState('');
   const [informacionBrindada, setInformacionBrindada] = useState('');
   const [observaciones, setObservaciones] = useState('');
   const [availableScripts, setAvailableScripts] = useState<ResponseScript[]>([]);
@@ -84,6 +88,12 @@ const RequirementFormNew = () => {
 
   const motivosReclamo: MotivoReclamo[] = [
     'Distribución', 'Devoluciones', 'Check-In', 'Alternativas', 'BSP'
+  ];
+
+  // Áreas específicas para escalamiento
+  const areasEscalamiento: AreaEscalamiento[] = [
+    'Cobros Ato', 'Sobreventa', 'Medios de pago', 'Facturación', 'Finanzas',
+    'Área Comercial', 'Ventas', 'Área legal', 'Distribución'
   ];
 
   // Función para obtener sub motivos según el motivo seleccionado
@@ -203,16 +213,15 @@ const RequirementFormNew = () => {
       return;
     }
 
-    // Validar si puede entregar información
-    if (puedeEntregarInformacion === 'Si') {
+    // Validar según la opción seleccionada
+    if (casoOpcion === 'SI_CERRAR_CASO') {
       if (!informacionBrindada.trim()) {
         toast.error('Por favor proporciona la información brindada al cliente antes de crear y cerrar el caso');
         return;
       }
     }
 
-    // Validar escalamiento
-    if (puedeEntregarInformacion === 'No') {
+    if (casoOpcion === 'NO_ESCALAR_CASO') {
       if (!escaladoA) {
         toast.error('Por favor selecciona a quién escalar el caso');
         return;
@@ -221,23 +230,32 @@ const RequirementFormNew = () => {
         toast.error('Por favor proporciona tu análisis y motivo del escalamiento al supervisor');
         return;
       }
-      if (escaladoA === 'OTRA_AREA' && !nombreAreaEscalamiento) {
-        toast.error('Por favor indica el nombre del área a escalar');
+      if (escaladoA === 'OTRA_AREA' && !areaEscalamiento) {
+        toast.error('Por favor selecciona el área a escalar');
         return;
       }
     }
 
-    // Determinar el estado según si puede entregar información
+    if (casoOpcion === 'NO_INTERACTUAR_AGENCIA') {
+      if (!consultaAgencia.trim()) {
+        toast.error('Por favor describe la consulta a realizar a la agencia');
+        return;
+      }
+    }
+
+    // Determinar el estado según la opción seleccionada
     let estadoInicial: any = 'nuevo';
     
-    if (puedeEntregarInformacion === 'Si') {
+    if (casoOpcion === 'SI_CERRAR_CASO') {
       estadoInicial = 'cerrado';
-    } else if (puedeEntregarInformacion === 'No') {
+    } else if (casoOpcion === 'NO_ESCALAR_CASO') {
       if (escaladoA === 'SUPERVISOR') {
         estadoInicial = 'pendiente-supervisor';
       } else if (escaladoA === 'OTRA_AREA') {
         estadoInicial = 'pendiente-otra-area';
       }
+    } else if (casoOpcion === 'NO_INTERACTUAR_AGENCIA') {
+      estadoInicial = 'pendiente-agencia';
     }
 
     const newRequirement = {
@@ -255,23 +273,27 @@ const RequirementFormNew = () => {
       subMotivo,
       subMotivoOtros: subMotivo === 'Otros' ? subMotivoOtros : undefined,
       solicitudCliente,
-      puedeEntregarInformacion: puedeEntregarInformacion === 'Si',
-      escaladoA: puedeEntregarInformacion === 'No' ? escaladoA as any : undefined,
-      nombreAreaEscalamiento: escaladoA === 'OTRA_AREA' ? nombreAreaEscalamiento : undefined,
+      casoOpcion,
+      escaladoA: casoOpcion === 'NO_ESCALAR_CASO' ? escaladoA as any : undefined,
+      areaEscalamiento: escaladoA === 'OTRA_AREA' ? areaEscalamiento as AreaEscalamiento : undefined,
       analisisAnalista: escaladoA === 'SUPERVISOR' ? analisisAnalista : undefined,
+      consultaAgencia: casoOpcion === 'NO_INTERACTUAR_AGENCIA' ? consultaAgencia : undefined,
+      respuestaAgencia: casoOpcion === 'NO_INTERACTUAR_AGENCIA' ? respuestaAgencia : undefined,
       informacionBrindada,
       observaciones,
       status: estadoInicial,
       priority: 'media' as const,
       initialDate: new Date(),
-      resolvedAt: puedeEntregarInformacion === 'Si' ? new Date() : undefined,
+      resolvedAt: casoOpcion === 'SI_CERRAR_CASO' ? new Date() : undefined,
     };
 
     addRequirement(newRequirement);
     
-    const actionText = puedeEntregarInformacion === 'Si' 
+    const actionText = casoOpcion === 'SI_CERRAR_CASO' 
       ? 'creado y cerrado exitosamente' 
-      : 'creado y escalado exitosamente';
+      : casoOpcion === 'NO_ESCALAR_CASO'
+      ? 'creado y escalado exitosamente'
+      : 'creado y enviado para interacción con agencia';
     
     toast.success(`Requerimiento ${actionText}`);
     navigate('/requirements');
@@ -574,27 +596,32 @@ const RequirementFormNew = () => {
           </CardContent>
         </Card>
 
-        {/* Control de Escalamiento */}
+        {/* Control de Gestión de Casos */}
         <Card>
           <CardHeader>
-            <CardTitle>Control de Escalamiento</CardTitle>
+            <CardTitle>Gestión del Caso</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>¿Puede entregar la información requerida? *</Label>
-              <RadioGroup value={puedeEntregarInformacion} onValueChange={setPuedeEntregarInformacion}>
+              <Label>¿Cómo desea proceder con este caso? *</Label>
+              <RadioGroup value={casoOpcion} onValueChange={(value) => setCasoOpcion(value as CasoOpcion)}>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Si" id="puede-si" />
-                  <Label htmlFor="puede-si">Sí</Label>
+                  <RadioGroupItem value="SI_CERRAR_CASO" id="cerrar-caso" />
+                  <Label htmlFor="cerrar-caso">Sí y Cerrar Caso</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="No" id="puede-no" />
-                  <Label htmlFor="puede-no">No</Label>
+                  <RadioGroupItem value="NO_ESCALAR_CASO" id="escalar-caso" />
+                  <Label htmlFor="escalar-caso">No y Escalar Caso</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="NO_INTERACTUAR_AGENCIA" id="interactuar-agencia" />
+                  <Label htmlFor="interactuar-agencia">No y Interactuar con Agencia</Label>
                 </div>
               </RadioGroup>
             </div>
 
-            {puedeEntregarInformacion === 'No' && (
+            {/* Opción: Escalar Caso */}
+            {casoOpcion === 'NO_ESCALAR_CASO' && (
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Escalar a: *</Label>
@@ -626,60 +653,92 @@ const RequirementFormNew = () => {
 
                 {escaladoA === 'OTRA_AREA' && (
                   <div className="space-y-2">
-                    <Label htmlFor="nombreAreaEscalamiento">Nombre del Área *</Label>
-                    <Input
-                      id="nombreAreaEscalamiento"
-                      value={nombreAreaEscalamiento}
-                      onChange={(e) => setNombreAreaEscalamiento(e.target.value)}
-                      placeholder="Ej: Finanzas, Operaciones, Comercial..."
-                      required
-                    />
+                    <Label htmlFor="areaEscalamiento">Seleccione el Área *</Label>
+                    <Select value={areaEscalamiento} onValueChange={(value) => setAreaEscalamiento(value as AreaEscalamiento)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione un área" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {areasEscalamiento.map((area) => (
+                          <SelectItem key={area} value={area}>
+                            {area}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Opción: Interactuar con Agencia */}
+            {casoOpcion === 'NO_INTERACTUAR_AGENCIA' && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="consultaAgencia">Consulta a realizar a la Agencia *</Label>
+                  <Textarea
+                    id="consultaAgencia"
+                    value={consultaAgencia}
+                    onChange={(e) => setConsultaAgencia(e.target.value)}
+                    placeholder="Describe la consulta específica que necesitas realizar a la agencia..."
+                    rows={4}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="respuestaAgencia">Respuesta de la Agencia</Label>
+                  <Textarea
+                    id="respuestaAgencia"
+                    value={respuestaAgencia}
+                    onChange={(e) => setRespuestaAgencia(e.target.value)}
+                    placeholder="Registra aquí la respuesta recibida de la agencia..."
+                    rows={3}
+                  />
+                </div>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Información Brindada */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Información Brindada</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {availableScripts.length > 0 && (
-              <ScriptSelector
-                scripts={availableScripts}
-                onApplyScript={handleApplyScript}
-              />
-            )}
-            
-            <div className="space-y-2">
-              <Label htmlFor="informacionBrindada">
-                {puedeEntregarInformacion === 'Si' ? 'Información Brindada al Cliente *' : 'Información Brindada al Cliente'}
-              </Label>
-              <Textarea
-                id="informacionBrindada"
-                value={informacionBrindada}
-                onChange={(e) => setInformacionBrindada(e.target.value)}
-                placeholder="Describe la información que se le brindó al cliente..."
-                rows={4}
-                required={puedeEntregarInformacion === 'Si'}
-              />
-            </div>
+        {/* Información Brindada - Solo para casos que se van a cerrar */}
+        {casoOpcion === 'SI_CERRAR_CASO' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Información Brindada</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {availableScripts.length > 0 && (
+                <ScriptSelector
+                  scripts={availableScripts}
+                  onApplyScript={handleApplyScript}
+                />
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="informacionBrindada">Información Brindada al Cliente *</Label>
+                <Textarea
+                  id="informacionBrindada"
+                  value={informacionBrindada}
+                  onChange={(e) => setInformacionBrindada(e.target.value)}
+                  placeholder="Describe la información que se le brindó al cliente..."
+                  rows={4}
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="observaciones">Observaciones</Label>
-              <Textarea
-                id="observaciones"
-                value={observaciones}
-                onChange={(e) => setObservaciones(e.target.value)}
-                placeholder="Observaciones adicionales..."
-                rows={3}
-              />
-            </div>
-          </CardContent>
-        </Card>
+              <div className="space-y-2">
+                <Label htmlFor="observaciones">Observaciones</Label>
+                <Textarea
+                  id="observaciones"
+                  value={observaciones}
+                  onChange={(e) => setObservaciones(e.target.value)}
+                  placeholder="Observaciones adicionales..."
+                  rows={3}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Botones de Acción */}
         <div className="flex justify-end gap-4">
@@ -687,7 +746,7 @@ const RequirementFormNew = () => {
             Cancelar
           </Button>
           <Button type="submit" className="gap-2">
-            {puedeEntregarInformacion === 'Si' ? (
+            {casoOpcion === 'SI_CERRAR_CASO' ? (
               <>
                 ✅ Crear y Cerrar Caso
               </>
