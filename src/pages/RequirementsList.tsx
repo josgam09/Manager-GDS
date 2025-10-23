@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useRequirements } from '@/contexts/RequirementContext';
 import { Button } from '@/components/ui/button';
@@ -17,10 +17,8 @@ import RequirementPriorityBadge from '@/components/RequirementPriorityBadge';
 import { Plus, Search, Download, Home } from 'lucide-react';
 import { RequirementStatus, RequirementPriority, OrigenConsulta } from '@/types/requirement';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
 
 const RequirementsList = () => {
-  const navigate = useNavigate();
   const { requirements } = useRequirements();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<RequirementStatus | 'all'>('all');
@@ -28,15 +26,21 @@ const RequirementsList = () => {
   const [origenFilter, setOrigenFilter] = useState<OrigenConsulta | 'all'>('all');
 
   const filteredRequirements = useMemo(() => {
+    if (!requirements || !Array.isArray(requirements)) {
+      return [];
+    }
+
     return requirements.filter((requirement) => {
-      const matchesSearch =
-        requirement.nombreAsesor.toLowerCase().includes(search.toLowerCase()) ||
-        requirement.solicitudCliente.toLowerCase().includes(search.toLowerCase()) ||
-        requirement.ticketNumber.toLowerCase().includes(search.toLowerCase()) ||
-        requirement.pnrTktLocalizador.toLowerCase().includes(search.toLowerCase()) ||
-        requirement.correoElectronico.toLowerCase().includes(search.toLowerCase()) ||
-        (requirement.tipoSolicitud && requirement.tipoSolicitud.toLowerCase().includes(search.toLowerCase())) ||
-        (requirement.asuntoCorreoElectronico && requirement.asuntoCorreoElectronico.toLowerCase().includes(search.toLowerCase()));
+      // Búsqueda segura
+      const searchTerm = search.toLowerCase();
+      const matchesSearch = 
+        (requirement.nombreAsesor && requirement.nombreAsesor.toLowerCase().includes(searchTerm)) ||
+        (requirement.solicitudCliente && requirement.solicitudCliente.toLowerCase().includes(searchTerm)) ||
+        (requirement.ticketNumber && requirement.ticketNumber.toLowerCase().includes(searchTerm)) ||
+        (requirement.pnrTktLocalizador && requirement.pnrTktLocalizador.toLowerCase().includes(searchTerm)) ||
+        (requirement.correoElectronico && requirement.correoElectronico.toLowerCase().includes(searchTerm)) ||
+        (requirement.tipoSolicitud && requirement.tipoSolicitud.toLowerCase().includes(searchTerm)) ||
+        (requirement.asuntoCorreoElectronico && requirement.asuntoCorreoElectronico.toLowerCase().includes(searchTerm));
       
       const matchesStatus = statusFilter === 'all' || requirement.status === statusFilter;
       const matchesPriority = priorityFilter === 'all' || requirement.priority === priorityFilter;
@@ -47,31 +51,36 @@ const RequirementsList = () => {
   }, [requirements, search, statusFilter, priorityFilter, origenFilter]);
 
   const exportToCSV = () => {
+    if (!filteredRequirements || filteredRequirements.length === 0) {
+      toast.error('No hay datos para exportar');
+      return;
+    }
+
     const headers = [
       'Ticket', 'Asesor', 'Origen', 'Soporte Inglés', 'Hora Ingreso',
-      'PNR/TKT/Localizador', 'Email', 'Tipo Solicitud', 'Reclamo/Incidente',
+      'PNR/TKT/Localizador', 'Email', 'Tipo Solicitud', 'Motivo',
       'Solicitud Cliente', 'Información Brindada', 'Observaciones',
       'Estado', 'Prioridad', 'Asignado a', 'Equipo', 'Fecha'
     ];
     
     const rows = filteredRequirements.map(req => [
-      req.ticketNumber,
-      req.nombreAsesor,
-      req.origenConsulta,
+      req.ticketNumber || '',
+      req.nombreAsesor || '',
+      req.origenConsulta || '',
       req.esSoporteIngles ? 'Sí' : 'No',
-      req.horaIngresoCorreo,
-      req.pnrTktLocalizador,
-      req.correoElectronico,
+      req.horaIngresoCorreo || '',
+      req.pnrTktLocalizador || '',
+      req.correoElectronico || '',
       req.tipoSolicitud || '',
       req.motivo || '',
-      req.solicitudCliente,
+      req.solicitudCliente || '',
       req.informacionBrindada || '',
       req.observaciones || '',
-      req.status,
-      req.priority,
+      req.status || '',
+      req.priority || '',
       req.assignedTo || '',
       req.assignedTeam || '',
-      new Date(req.initialDate).toLocaleDateString('es-AR'),
+      req.initialDate ? new Date(req.initialDate).toLocaleDateString('es-AR') : '',
     ]);
 
     const csvContent = [
@@ -92,15 +101,40 @@ const RequirementsList = () => {
     toast.success('Archivo CSV descargado exitosamente');
   };
 
+  // Verificación de datos
+  if (!requirements) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Gestión de Requerimientos GDS</h1>
+            <p className="text-muted-foreground mt-1">
+              Administra y da seguimiento a todos los requerimientos
+            </p>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-center text-muted-foreground">
+              Cargando requerimientos...
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center flex-wrap gap-4">
         <div>
           <div className="flex gap-2 mb-2">
-            <Button onClick={() => navigate('/')} variant="outline" size="sm" className="gap-2">
-              <Home className="h-4 w-4" />
-              Inicio
-            </Button>
+            <Link to="/">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Home className="h-4 w-4" />
+                Inicio
+              </Button>
+            </Link>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">Gestión de Requerimientos GDS</h1>
           <p className="text-muted-foreground mt-1">
@@ -148,6 +182,8 @@ const RequirementsList = () => {
                 <SelectItem value="pendiente-supervisor">Pendiente Supervisor</SelectItem>
                 <SelectItem value="respuesta-supervisor">Respuesta Supervisor</SelectItem>
                 <SelectItem value="pendiente-otra-area">Pendiente Otra Área</SelectItem>
+                <SelectItem value="pendiente-agencia">Pendiente Agencia</SelectItem>
+                <SelectItem value="respuesta-agencia">Respuesta Agencia</SelectItem>
                 <SelectItem value="resuelto">Resuelto</SelectItem>
                 <SelectItem value="cerrado">Cerrado</SelectItem>
               </SelectContent>
@@ -183,16 +219,26 @@ const RequirementsList = () => {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>Requerimientos ({filteredRequirements.length})</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Total: {requirements.length} | Filtrados: {filteredRequirements.length}
+            </p>
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {filteredRequirements.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">No se encontraron requerimientos</p>
-                <Link to="/requirements/new">
-                  <Button className="mt-4">Crear Primer Requerimiento</Button>
-                </Link>
+                <p className="text-muted-foreground">
+                  {requirements.length === 0 
+                    ? 'No hay requerimientos disponibles' 
+                    : 'No se encontraron requerimientos con los filtros aplicados'
+                  }
+                </p>
+                {requirements.length === 0 && (
+                  <Link to="/requirements/new">
+                    <Button className="mt-4">Crear Primer Requerimiento</Button>
+                  </Link>
+                )}
               </div>
             ) : (
               filteredRequirements.map((requirement) => (
@@ -205,10 +251,10 @@ const RequirementsList = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded">
-                          {requirement.ticketNumber}
+                          {requirement.ticketNumber || 'Sin ticket'}
                         </span>
                         <Badge variant="outline" className="text-xs">
-                          {requirement.origenConsulta}
+                          {requirement.origenConsulta || 'Sin origen'}
                         </Badge>
                         {requirement.esSoporteIngles && (
                           <Badge variant="secondary" className="text-xs">EN</Badge>
@@ -218,21 +264,30 @@ const RequirementsList = () => {
                         {requirement.tipoSolicitud || 'Requerimiento GDS'}
                       </h3>
                       <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                        {requirement.solicitudCliente}
+                        {requirement.solicitudCliente || 'Sin descripción'}
                       </p>
                       <div className="flex flex-wrap items-center gap-2 text-sm">
                         <RequirementStatusBadge status={requirement.status} />
                         <RequirementPriorityBadge priority={requirement.priority} />
                         <span className="text-muted-foreground">•</span>
-                        <span className="text-muted-foreground">PNR: {requirement.pnrTktLocalizador}</span>
+                        <span className="text-muted-foreground">
+                          PNR: {requirement.pnrTktLocalizador || 'N/A'}
+                        </span>
                         <span className="text-muted-foreground">•</span>
-                        <span className="text-muted-foreground">Asesor: {requirement.nombreAsesor}</span>
+                        <span className="text-muted-foreground">
+                          Asesor: {requirement.nombreAsesor || 'N/A'}
+                        </span>
                       </div>
                     </div>
                     <div className="text-right text-sm text-muted-foreground whitespace-nowrap">
-                      <div>{new Date(requirement.initialDate).toLocaleDateString('es-AR')}</div>
+                      <div>
+                        {requirement.initialDate 
+                          ? new Date(requirement.initialDate).toLocaleDateString('es-AR')
+                          : 'Sin fecha'
+                        }
+                      </div>
                       <div className="text-xs mt-1">
-                        {requirement.horaIngresoCorreo}
+                        {requirement.horaIngresoCorreo || 'Sin hora'}
                       </div>
                     </div>
                   </div>
