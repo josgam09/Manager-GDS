@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import RequirementStatusBadge from '@/components/RequirementStatusBadge';
 import RequirementPriorityBadge from '@/components/RequirementPriorityBadge';
+import { calcularTiempoPorEstado, calcularTiempoTotal } from '@/utils/timeUtils';
 import { 
   Table, 
   TableBody, 
@@ -39,6 +40,7 @@ interface RequirementsTableProps {
 type SortField = 
   | 'ticketNumber'
   | 'status'
+  | 'statusChangedAt'
   | 'pais'
   | 'initialDate'
   | 'horaIngresoCorreo'
@@ -307,6 +309,16 @@ const RequirementsTable: React.FC<RequirementsTableProps> = ({
               </TableHead>
               <TableHead 
                 className="cursor-pointer hover:bg-muted/50"
+                onClick={() => handleSort('statusChangedAt')}
+              >
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Tiempo por Estado
+                  {getSortIcon('statusChangedAt')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer hover:bg-muted/50"
                 onClick={() => handleSort('pais')}
               >
                 <div className="flex items-center gap-2">
@@ -399,6 +411,16 @@ const RequirementsTable: React.FC<RequirementsTableProps> = ({
                   {getSortIcon('priority')}
                 </div>
               </TableHead>
+              <TableHead 
+                className="cursor-pointer hover:bg-muted/50"
+                onClick={() => handleSort('initialDate')}
+              >
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Tiempo Total
+                  {getSortIcon('initialDate')}
+                </div>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -416,6 +438,14 @@ const RequirementsTable: React.FC<RequirementsTableProps> = ({
                 </TableCell>
                 <TableCell>
                   <RequirementStatusBadge status={requirement.status} />
+                </TableCell>
+                <TableCell className="text-sm">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-3 w-3 text-muted-foreground" />
+                    <span className="font-mono">
+                      {calcularTiempoPorEstado(requirement.statusChangedAt)}
+                    </span>
+                  </div>
                 </TableCell>
                 <TableCell>
                   <Badge variant="secondary">{requirement.pais}</Badge>
@@ -456,6 +486,14 @@ const RequirementsTable: React.FC<RequirementsTableProps> = ({
                 </TableCell>
                 <TableCell>
                   <RequirementPriorityBadge priority={requirement.priority} />
+                </TableCell>
+                <TableCell className="text-sm">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-3 w-3 text-muted-foreground" />
+                    <span className="font-mono">
+                      {calcularTiempoTotal(requirement.initialDate)}
+                    </span>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

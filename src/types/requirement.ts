@@ -317,6 +317,7 @@ export interface Requirement {
   createdAt: Date;
   updatedAt: Date;
   resolvedAt?: Date;
+  statusChangedAt?: Date; // Fecha del último cambio de estado
   
   // Historial y extras
   history: RequirementHistory[];

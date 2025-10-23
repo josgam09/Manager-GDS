@@ -41,6 +41,7 @@ const mockRequirements: Requirement[] = [
     resolvedAt: new Date('2025-01-16'),
     createdAt: new Date('2025-01-15'),
     updatedAt: new Date('2025-01-16'),
+    statusChangedAt: new Date('2025-01-16'),
     history: [
       {
         id: '1',
@@ -297,11 +298,19 @@ export const RequirementProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateRequirement = (id: string, updates: Partial<Requirement>) => {
-    setRequirements(requirements.map(requirement => 
-      requirement.id === id 
-        ? { ...requirement, ...updates, updatedAt: new Date() }
-        : requirement
-    ));
+    setRequirements(requirements.map(requirement => {
+      if (requirement.id === id) {
+        const updatedRequirement = { ...requirement, ...updates, updatedAt: new Date() };
+        
+        // Si el estado cambió, actualizar statusChangedAt
+        if (updates.status && updates.status !== requirement.status) {
+          updatedRequirement.statusChangedAt = new Date();
+        }
+        
+        return updatedRequirement;
+      }
+      return requirement;
+    }));
   };
 
   const deleteRequirement = (id: string) => {
