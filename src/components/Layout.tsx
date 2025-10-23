@@ -33,7 +33,7 @@ const Layout = ({ children }: LayoutProps) => {
   // Navegación según rol
   const roleNavigation = [
     // Analista puede crear nuevos requerimientos
-    { name: 'Nuevo Requerimiento', href: '/requirements/new', icon: PlusCircle, roles: ['ADMINISTRADOR', 'ANALISTA'] },
+    { name: 'Nuevo Requerimiento', href: '/requirements/new', icon: PlusCircle, roles: ['ADMINISTRADOR', 'ANALISTA', 'SUPERVISOR'] },
     // Supervisor tiene bandeja especial
     { name: 'Bandeja Supervisor', href: '/supervisor/inbox', icon: Inbox, roles: ['ADMINISTRADOR', 'SUPERVISOR'] },
     // Administrador tiene panel de administración
