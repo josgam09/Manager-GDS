@@ -21,6 +21,8 @@ const RequirementDetail = () => {
   const { getRequirement, updateRequirement } = useRequirements();
   const [respuestaAgencia, setRespuestaAgencia] = useState('');
   const [showAgencyResponseForm, setShowAgencyResponseForm] = useState(false);
+  const [respuestaOtraArea, setRespuestaOtraArea] = useState('');
+  const [showOtherAreaResponseForm, setShowOtherAreaResponseForm] = useState(false);
   const [showCaseManagement, setShowCaseManagement] = useState(false);
   const [caseManagementOption, setCaseManagementOption] = useState<'SI_CERRAR_CASO' | 'NO_ESCALAR_CASO' | 'NO_INTERACTUAR_AGENCIA' | ''>('');
   const [escaladoA, setEscaladoA] = useState('');
@@ -120,6 +122,48 @@ const RequirementDetail = () => {
     toast.success('Respuesta de agencia registrada. Ahora puedes evaluar si tienes la información para resolver el caso.');
   };
 
+  const handleOtherAreaResponse = () => {
+    if (!requirement || !user || !respuestaOtraArea.trim()) {
+      toast.error('Por favor, ingresa la respuesta de la otra área');
+      return;
+    }
+
+    const newInteraction = {
+      id: Date.now().toString(),
+      fecha: new Date(),
+      consulta: requirement.consultaOtraArea || `Consulta realizada al área de ${requirement.areaEscalamiento}`,
+      respuesta: respuestaOtraArea.trim(),
+      usuario: user.name,
+      area: requirement.areaEscalamiento || 'Área no especificada',
+    };
+
+    const updates = {
+      respuestaOtraArea: respuestaOtraArea.trim(),
+      historialInteraccionOtraArea: [
+        ...(requirement.historialInteraccionOtraArea || []),
+        newInteraction,
+      ],
+      status: 'respuesta-otra-area',
+      updatedAt: new Date(),
+      history: [
+        ...requirement.history,
+        {
+          id: Date.now().toString(),
+          date: new Date(),
+          action: `Respuesta de ${requirement.areaEscalamiento} recibida`,
+          user: user.name,
+          comment: `Respuesta: ${respuestaOtraArea.trim()}`,
+        },
+      ],
+    };
+
+    updateRequirement(requirement.id, updates);
+    setRespuestaOtraArea('');
+    setShowOtherAreaResponseForm(false);
+    
+    toast.success(`Respuesta de ${requirement.areaEscalamiento} registrada. Ahora puedes evaluar si tienes la información para resolver el caso.`);
+  };
+
   const handleRestartCaseManagement = () => {
     if (!requirement || !user) return;
 
@@ -158,7 +202,7 @@ const RequirementDetail = () => {
           date: new Date(),
           action: 'Iniciada gestión continua del caso',
           user: user.name,
-          comment: 'El analista ha iniciado la gestión continua del caso desde el detalle',
+          comment: 'El usuario ha iniciado la gestión continua del caso desde el detalle',
         },
       ],
     };
@@ -288,7 +332,7 @@ const RequirementDetail = () => {
             Volver a Requerimientos
           </Button>
         </div>
-        {user && ['ADMINISTRADOR', 'SUPERVISOR'].includes(user.role) && (
+        {user && user.role === 'ADMINISTRADOR' && (
           <Link to={`/requirements/${requirement.id}/edit`}>
             <Button>Editar Requerimiento</Button>
           </Link>
@@ -561,6 +605,136 @@ const RequirementDetail = () => {
                 </>
               )}
 
+              {/* Sección de Interacción con Otra Área */}
+              {requirement.casoOpcion === 'NO_ESCALAR_CASO' && requirement.escaladoA === 'OTRA_AREA' && (
+                <>
+                  <Separator />
+                  <div className="p-4 bg-purple-50 dark:bg-purple-950/30 rounded-lg border-2 border-purple-500/50">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2 text-purple-700 dark:text-purple-400">
+                      <MessageSquareText className="h-5 w-5" />
+                      Interacción con {requirement.areaEscalamiento}
+                    </h3>
+                    
+                    {/* Estado actual */}
+                    {requirement.respuestaOtraArea ? (
+                      <div className="mb-4 p-3 bg-white dark:bg-purple-900/20 rounded border border-purple-200 dark:border-purple-800">
+                        <p className="text-sm font-semibold mb-2">📥 Respuesta de {requirement.areaEscalamiento}:</p>
+                        <p className="whitespace-pre-wrap text-sm">{requirement.respuestaOtraArea}</p>
+                      </div>
+                    ) : (
+                      <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800">
+                        <p className="text-sm font-semibold mb-2 text-yellow-700 dark:text-yellow-400">
+                          ⏳ Pendiente de respuesta de {requirement.areaEscalamiento}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Una vez que recibas la respuesta, podrás evaluar si tienes la información necesaria para resolver el caso.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Botón para actualizar respuesta */}
+                    {!requirement.respuestaOtraArea && user && ['ANALISTA', 'SUPERVISOR', 'ADMINISTRADOR'].includes(user.role) && (
+                      <div className="space-y-3">
+                        {!showOtherAreaResponseForm ? (
+                          <Button 
+                            onClick={() => setShowOtherAreaResponseForm(true)} 
+                            className="gap-2"
+                          >
+                            <Send className="h-4 w-4" />
+                            Actualizar: Respuesta de {requirement.areaEscalamiento} Recibida
+                          </Button>
+                        ) : (
+                          <div className="space-y-3">
+                            <Label htmlFor="respuestaOtraArea">Respuesta de {requirement.areaEscalamiento} *</Label>
+                            <Textarea
+                              id="respuestaOtraArea"
+                              value={respuestaOtraArea}
+                              onChange={(e) => setRespuestaOtraArea(e.target.value)}
+                              placeholder={`Ingresa la respuesta recibida de ${requirement.areaEscalamiento}...`}
+                              rows={4}
+                            />
+                            <div className="flex gap-2">
+                              <Button onClick={handleOtherAreaResponse} disabled={!respuestaOtraArea.trim()} className="gap-2">
+                                <Send className="h-4 w-4" />
+                                Registrar Respuesta
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                onClick={() => {
+                                  setShowOtherAreaResponseForm(false);
+                                  setRespuestaOtraArea('');
+                                }}
+                              >
+                                Cancelar
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Botón para reiniciar gestión después de recibir respuesta */}
+                    {requirement.respuestaOtraArea && user && ['ANALISTA', 'SUPERVISOR', 'ADMINISTRADOR'].includes(user.role) && (
+                      <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-800">
+                        <p className="text-sm font-semibold mb-2 text-green-700 dark:text-green-400">
+                          ✅ Respuesta recibida - ¿Puedes resolver el caso ahora?
+                        </p>
+                        <p className="text-xs text-muted-foreground mb-3">
+                          Con la información de {requirement.areaEscalamiento}, evalúa si puedes proporcionar la solución al cliente.
+                        </p>
+                        <Button 
+                          onClick={handleRestartCaseManagement}
+                          className="gap-2 bg-green-600 hover:bg-green-700"
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                          Reiniciar Evaluación de Caso
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Historial de Interacciones */}
+                    {requirement.historialInteraccionOtraArea && requirement.historialInteraccionOtraArea.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-sm font-semibold mb-2">📋 Historial de Interacciones ({requirement.historialInteraccionOtraArea.length}):</p>
+                        <div className="space-y-2">
+                          {requirement.historialInteraccionOtraArea.map((interaction, index) => (
+                            <div key={interaction.id} className="p-2 bg-gray-50 dark:bg-gray-900/30 rounded text-xs">
+                              <div className="flex justify-between items-start mb-1">
+                                <span className="font-semibold">Interacción #{index + 1}</span>
+                                <span className="text-muted-foreground">
+                                  {new Date(interaction.fecha).toLocaleString('es-AR')}
+                                </span>
+                              </div>
+                              <div className="space-y-1">
+                                <div>
+                                  <span className="font-medium">Área:</span>
+                                  <span className="text-muted-foreground ml-1">{interaction.area}</span>
+                                </div>
+                                <div>
+                                  <span className="font-medium">Consulta:</span>
+                                  <p className="text-muted-foreground">{interaction.consulta}</p>
+                                </div>
+                                <div>
+                                  <span className="font-medium">Respuesta:</span>
+                                  <p className="text-muted-foreground">{interaction.respuesta}</p>
+                                </div>
+                                <div className="text-muted-foreground">
+                                  Registrado por: {interaction.usuario}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <Badge variant="outline" className="bg-purple-100 dark:bg-purple-900/30">
+                      {requirement.respuestaOtraArea ? '✅ Respuesta recibida' : '⏳ Esperando respuesta'}
+                    </Badge>
+                  </div>
+                </>
+              )}
+
               {/* Información de Escalamiento */}
               {requirement.casoOpcion === 'NO_ESCALAR_CASO' && (
                 <>
@@ -604,8 +778,8 @@ const RequirementDetail = () => {
             </CardContent>
           </Card>
 
-          {/* Gestión Continua de Casos - Solo para Analistas */}
-          {user && user.role === 'ANALISTA' && (
+          {/* Gestión Continua de Casos - Para todos los usuarios */}
+          {user && (
             <Card className="border-2 border-blue-500/50 bg-blue-50/10 dark:bg-blue-950/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
@@ -615,7 +789,7 @@ const RequirementDetail = () => {
               </CardHeader>
               <CardContent>
                 {/* Estados que permiten gestión continua */}
-                {['nuevo', 'en-gestion', 'respuesta-agencia'].includes(requirement.status) && !showCaseManagement && (
+                {['nuevo', 'en-gestion', 'respuesta-agencia', 'respuesta-otra-area'].includes(requirement.status) && !showCaseManagement && (
                   <div className="space-y-3">
                     <p className="text-sm text-muted-foreground">
                       Puedes continuar la gestión de este caso directamente desde aquí.

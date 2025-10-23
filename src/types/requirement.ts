@@ -5,6 +5,7 @@ export type RequirementStatus =
   | 'pendiente-supervisor' 
   | 'respuesta-supervisor'
   | 'pendiente-otra-area' 
+  | 'respuesta-otra-area'
   | 'pendiente-agencia'
   | 'respuesta-agencia'
   | 'resuelto' 
@@ -287,6 +288,18 @@ export interface Requirement {
     consulta: string;
     respuesta: string;
     usuario: string;
+  }>;
+
+  // Interacción con Otra Área
+  consultaOtraArea?: string; // Consulta realizada a la otra área
+  respuestaOtraArea?: string; // Respuesta recibida de la otra área
+  historialInteraccionOtraArea?: Array<{
+    id: string;
+    fecha: Date;
+    consulta: string;
+    respuesta: string;
+    usuario: string;
+    area: string; // Área específica
   }>;
   
   informacionBrindada: string; // Texto largo
